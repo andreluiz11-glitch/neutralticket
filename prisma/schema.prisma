@@ -1,0 +1,91 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  orders       Order[]
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  userId        String?
+  user          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  customerName  String?
+  customerEmail String
+
+  status        OrderStatus   @default(pending)
+  paymentMethod PaymentMethod @default(manual_pix)
+
+  total         Int
+  pixTxid       String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  paidAt        DateTime?
+
+  items         OrderItem[]
+  tickets       Ticket[]
+}
+
+model OrderItem {
+  id         String  @id @default(cuid())
+  orderId    String
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  eventSlug  String
+  eventTitle String?
+  ticketName String
+  unitPrice  Int
+  qty        Int
+}
+
+model Ticket {
+  id            String       @id @default(cuid())
+  code          String       @unique
+  orderId       String
+  order         Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  customerName  String?
+  customerEmail String
+
+  eventSlug     String
+  eventTitle    String
+  ticketName    String
+
+  status        TicketStatus @default(valid)
+  createdAt     DateTime     @default(now())
+  usedAt        DateTime?
+}
+
+enum OrderStatus {
+  pending
+  payment_reported
+  paid
+  canceled
+  ticket_sent
+}
+
+enum PaymentMethod {
+  manual_pix
+  picpay
+  mercado_pago
+}
+
+enum TicketStatus {
+  valid
+  used
+  canceled
+}

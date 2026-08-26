@@ -1,0 +1,102 @@
+[
+  {
+    "id": "ord_1787606250037_fde48223e022",
+    "status": "CANCELED",
+    "customer": {
+      "name": "admin",
+      "email": "admin"
+    },
+    "items": [
+      {
+        "id": "reveillon-riviera",
+        "title": "RÉVEILLON RIVIERA",
+        "date": "2026-12-27T22:00",
+        "location": "Arena Riviera - Alameda Jandaia, S/N (Próximo ao Burger King da Avenida Marginal)",
+        "ticketName": "PASSAPORTE FEMININO",
+        "unitPrice": 1300,
+        "qty": 1
+      },
+      {
+        "id": "reveillon-riviera",
+        "title": "RÉVEILLON RIVIERA",
+        "date": "2026-12-27T22:00",
+        "location": "Arena Riviera - Alameda Jandaia, S/N (Próximo ao Burger King da Avenida Marginal)",
+        "ticketName": "PASSAPORTE MASCULINO",
+        "unitPrice": 1450,
+        "qty": 1
+      }
+    ],
+    "amount": 2750,
+    "paymentMethod": "MANUAL_PIX",
+    "pixTxid": "ORD1787606250037FDE48223E",
+    "createdAt": "2026-08-24T21:17:30.037Z",
+    "updatedAt": "2026-08-24T22:02:54.321Z"
+  },
+  {
+    "id": "ord_1787605185605_0a6297f5d8df",
+    "status": "CANCELED",
+    "customer": {
+      "name": "admin",
+      "email": "admin"
+    },
+    "items": [
+      {
+        "id": "reveillon-riviera",
+        "title": "RÉVEILLON RIVIERA",
+        "date": "2026-12-27T22:00",
+        "location": "Arena Riviera - Alameda Jandaia, S/N (Próximo ao Burger King da Avenida Marginal)",
+        "ticketName": "PASSAPORTE MASCULINO",
+        "unitPrice": 1450,
+        "qty": 1
+      },
+      {
+        "id": "reveillon-riviera",
+        "title": "RÉVEILLON RIVIERA",
+        "date": "2026-12-27T22:00",
+        "location": "Arena Riviera - Alameda Jandaia, S/N (Próximo ao Burger King da Avenida Marginal)",
+        "ticketName": "PASSAPORTE FEMININO",
+        "unitPrice": 1300,
+        "qty": 1
+      }
+    ],
+    "amount": 2750,
+    "paymentMethod": "MANUAL_PIX",
+    "pixTxid": "ORD17876051856050A6297F5D",
+    "createdAt": "2026-08-24T20:59:45.605Z",
+    "updatedAt": "2026-08-24T22:03:01.835Z"
+  },
+  {
+    "id": "ord_1787604545784_c93dc6a10946",
+    "status": "PAID",
+    "customer": {
+      "name": "admin",
+      "email": "admin"
+    },
+    "items": [
+      {
+        "id": "reveillon-riviera",
+        "title": "RÉVEILLON RIVIERA",
+        "date": "2026-12-27T22:00",
+        "location": "Arena Riviera - Alameda Jandaia, S/N (Próximo ao Burger King da Avenida Marginal)",
+        "ticketName": "PASSAPORTE MASCULINO",
+        "unitPrice": 1450,
+        "qty": 1
+      },
+      {
+        "id": "reveillon-riviera",
+        "title": "RÉVEILLON RIVIERA",
+        "date": "2026-12-27T22:00",
+        "location": "Arena Riviera - Alameda Jandaia, S/N (Próximo ao Burger King da Avenida Marginal)",
+        "ticketName": "PASSAPORTE FEMININO",
+        "unitPrice": 1300,
+        "qty": 1
+      }
+    ],
+    "amount": 2750,
+    "paymentMethod": "MANUAL_PIX",
+    "pixTxid": "ORD1787604545784C93DC6A10",
+    "createdAt": "2026-08-24T20:49:05.784Z",
+    "updatedAt": "2026-08-24T22:03:07.302Z",
+    "paidAt": "2026-08-24T22:03:07.302Z"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "slug": "reveillon-riviera",
+    "title": "RÉVEILLON RIVIERA",
+    "date": "2026-12-27T22:00",
+    "location": "Arena Riviera - Alameda Jandaia, S/N (Próximo ao Burger King da Avenida Marginal)",
+    "category": "Réveillon",
+    "price": 1300,
+    "imageUrl": "/uploads/riviera-reveillon.webp",
+    "description": "O Réveillon Riviera está de volta ao litoral norte com uma programação imperdível: 6 dias de full open bar e shows inesquecíveis com o melhor do funk e trap.\n\nEstrutura 100% coberta, piso elevado, banheiros VIP e infraestrutura equipada para criar a melhor virada da sua vida.\n\nProgramação:\n\n27/12 - Cria Sessions com Orochi\n28/12 - Luau com MC IG\n29/12 - Baile do Japa NK\n30/12 - Baile 360 com GP da ZL & DJ Graeff\n31/12 - Réveillon Riviera com MC Paiva\n02/01 - Ressacada Riviera com DJ GBR\n\nFull Open Bar.\n\nClassificação: 18 anos.\n\nMais informações via WhatsApp com nosso concierge: (11) 99460-0686.",
+    "attractions": [
+      "Orochi",
+      "MC IG",
+      "Japa NK",
+      "GP da ZL",
+      "DJ Graeff",
+      "MC Paiva",
+      "DJ GBR"
+    ],
+    "tickets": [
+      {
+        "name": "PASSAPORTE FEMININO",
+        "price": 1300
+      },
+      {
+        "name": "PASSAPORTE MASCULINO",
+        "price": 1450
+      }
+    ],
+    "extras": []
+  }
+]
