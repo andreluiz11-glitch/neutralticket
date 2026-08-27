@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { getOrderById, updateOrderStatus } from "@/lib/orders";
-import { sendTicketEmail } from "@/lib/email";
 import { generateTicketsForOrder } from "@/lib/tickets";
+import { sendTicketEmail } from "@/lib/email";
+import { getOrderById, updateOrderStatus } from "@/lib/orders";
 
 export const dynamic = "force-dynamic";
 
@@ -21,19 +21,12 @@ export async function POST(
       );
     }
 
-    const currentOrder = await getOrderById(orderId);
+    const order = await getOrderById(orderId);
 
-    if (!currentOrder) {
+    if (!order) {
       return NextResponse.json(
         { error: "Pedido não encontrado." },
         { status: 404 }
-      );
-    }
-
-    if (currentOrder.status === "CANCELED") {
-      return NextResponse.json(
-        { error: "Este pedido está cancelado." },
-        { status: 400 }
       );
     }
 
@@ -41,33 +34,67 @@ export async function POST(
 
     if (!paidOrder) {
       return NextResponse.json(
-        { error: "Não foi possível confirmar o pedido." },
+        { error: "Não foi possível atualizar o pedido." },
         { status: 500 }
       );
     }
 
     const tickets = await generateTicketsForOrder(orderId);
 
-    await sendTicketEmail({
-      to: paidOrder.customer.email,
-      customerName: paidOrder.customer.name,
-      orderId: paidOrder.id,
-      tickets,
-    });
+    let emailSent = false;
+    let emailError: string | null = null;
 
-    const finalOrder = await updateOrderStatus(orderId, "TICKET_SENT");
+    const orderData: any = paidOrder;
+    const customerName =
+      orderData.customerName || orderData.customer?.name || "Cliente";
+    const customerEmail =
+      orderData.customerEmail || orderData.customer?.email || "";
+
+    if (!customerEmail) {
+      return NextResponse.json(
+        { error: "E-mail do cliente não encontrado no pedido." },
+        { status: 400 }
+      );
+    }
+
+    try {
+      await sendTicketEmail({
+        order: {
+          id: orderData.id,
+          customerName,
+          customerEmail,
+          total: orderData.total || 0,
+        },
+        tickets: tickets.map((ticket: any) => ({
+          code: ticket.code,
+          eventTitle: ticket.eventTitle,
+          eventSlug: ticket.eventSlug,
+          ticketName: ticket.ticketName,
+          customerName: ticket.customerName || customerName,
+          customerEmail: ticket.customerEmail || customerEmail,
+        })),
+      });
+
+      emailSent = true;
+    } catch (error: any) {
+      emailSent = false;
+      emailError = error?.message || "Não foi possível enviar o e-mail.";
+    }
+
+    const finalOrder = emailSent
+      ? await updateOrderStatus(orderId, "TICKET_SENT")
+      : paidOrder;
 
     return NextResponse.json({
-      order: finalOrder || paidOrder,
+      order: finalOrder,
       tickets,
-      message: "Pagamento confirmado, ingresso gerado e e-mail enviado.",
+      emailSent,
+      emailError,
     });
   } catch (error: any) {
     return NextResponse.json(
       {
-        error:
-          error?.message ||
-          "Não foi possível confirmar o pagamento, gerar o ingresso e enviar o e-mail.",
+        error: error?.message || "Não foi possível confirmar o pagamento.",
       },
       { status: 500 }
     );

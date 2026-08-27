@@ -44,8 +44,9 @@ export default async function TicketPage({
   const pdfUrl = `${baseUrl}/api/tickets/${ticket.code}/pdf`;
 
   const qrCodeDataUrl = await QRCode.toDataURL(ticketUrl, {
-    width: 360,
+    width: 400,
     margin: 2,
+    errorCorrectionLevel: "H",
   });
 
   return (
@@ -56,9 +57,7 @@ export default async function TicketPage({
             Clube do Ingresso
           </p>
 
-          <h1 className="mt-3 text-3xl font-black">
-            Ingresso Digital
-          </h1>
+          <h1 className="mt-3 text-3xl font-black">Ingresso Digital</h1>
 
           <p className="mt-2 text-sm text-zinc-300">
             Apresente este QR Code na entrada do evento.
@@ -136,21 +135,27 @@ export default async function TicketPage({
 
           <div className="grid gap-3 sm:grid-cols-2">
             <a
+              href={ticketUrl}
+              className="flex h-12 items-center justify-center rounded-2xl border border-zinc-300 bg-white px-4 text-center text-sm font-black text-zinc-950 transition hover:bg-zinc-100"
+            >
+              Visualizar ingresso
+            </a>
+
+            <a
               href={pdfUrl}
-              target="_blank"
-              rel="noreferrer"
+              download
               className="flex h-12 items-center justify-center rounded-2xl bg-orange-500 px-4 text-center text-sm font-black text-black transition hover:bg-orange-400"
             >
               Baixar ingresso em PDF
             </a>
-
-            <a
-              href="/"
-              className="flex h-12 items-center justify-center rounded-2xl border border-zinc-300 bg-white px-4 text-center text-sm font-black text-zinc-950 transition hover:bg-zinc-100"
-            >
-              Voltar ao site
-            </a>
           </div>
+
+          <a
+            href="/"
+            className="flex h-12 items-center justify-center rounded-2xl border border-zinc-300 bg-white px-4 text-center text-sm font-black text-zinc-950 transition hover:bg-zinc-100"
+          >
+            Voltar ao site
+          </a>
         </div>
       </section>
     </main>
