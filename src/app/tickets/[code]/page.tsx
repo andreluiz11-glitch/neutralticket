@@ -1,25 +1,50 @@
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import QRCode from "qrcode";
 import { getTicketByCode } from "@/lib/tickets";
 
 export const dynamic = "force-dynamic";
 
-function getBaseUrl() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+function formatStatus(status: string) {
+  if (status === "USED") {
+    return "Utilizado";
   }
 
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
+  if (status === "CANCELED") {
+    return "Cancelado";
   }
 
-  return "http://localhost:3000";
+  return "Válido";
 }
 
-function formatStatus(status: string) {
-  if (status === "USED") return "Utilizado";
-  if (status === "CANCELED") return "Cancelado";
-  return "Válido";
+async function getCurrentOrigin() {
+  const headerList = await headers();
+
+  const host =
+    headerList.get("x-forwarded-host") ||
+    headerList.get("host");
+
+  const forwardedProtocol =
+    headerList.get("x-forwarded-proto");
+
+  if (!host) {
+    return "http://localhost:3000";
+  }
+
+  let protocol = forwardedProtocol;
+
+  if (!protocol) {
+    if (
+      host.includes("localhost") ||
+      host.startsWith("192.168.")
+    ) {
+      protocol = "http";
+    } else {
+      protocol = "https";
+    }
+  }
+
+  return `${protocol}://${host}`;
 }
 
 export default async function TicketPage({
@@ -39,12 +64,18 @@ export default async function TicketPage({
     return notFound();
   }
 
-  const baseUrl = getBaseUrl();
-  const ticketUrl = `${baseUrl}/tickets/${ticket.code}`;
-  const pdfUrl = `${baseUrl}/api/tickets/${ticket.code}/pdf`;
+  const origin = await getCurrentOrigin();
+
+  const ticketUrl = `${origin}/tickets/${encodeURIComponent(
+    ticket.code
+  )}`;
+
+  const pdfUrl = `/api/tickets/${encodeURIComponent(
+    ticket.code
+  )}/pdf`;
 
   const qrCodeDataUrl = await QRCode.toDataURL(ticketUrl, {
-    width: 400,
+    width: 420,
     margin: 2,
     errorCorrectionLevel: "H",
   });
@@ -57,7 +88,9 @@ export default async function TicketPage({
             Clube do Ingresso
           </p>
 
-          <h1 className="mt-3 text-3xl font-black">Ingresso Digital</h1>
+          <h1 className="mt-3 text-3xl font-black">
+            Ingresso Digital
+          </h1>
 
           <p className="mt-2 text-sm text-zinc-300">
             Apresente este QR Code na entrada do evento.
@@ -66,7 +99,7 @@ export default async function TicketPage({
 
         <div className="space-y-6 p-6">
           <div className="flex justify-center">
-            <div className="rounded-3xl border border-zinc-200 bg-white p-4 shadow-sm">
+            <div className="rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm">
               <img
                 src={qrCodeDataUrl}
                 alt="QR Code do ingresso"
@@ -77,7 +110,7 @@ export default async function TicketPage({
 
           <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 text-center">
             <p className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500">
-              Status
+              Status do ingresso
             </p>
 
             <p className="mt-2 text-2xl font-black text-zinc-950">
@@ -86,44 +119,48 @@ export default async function TicketPage({
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-zinc-200 p-4">
+            <div className="rounded-2xl border border-zinc-200 p-5">
               <p className="text-xs font-black uppercase text-zinc-500">
                 Evento
               </p>
-              <p className="mt-1 break-words text-sm font-black text-zinc-950">
+
+              <p className="mt-2 break-words font-black text-zinc-950">
                 {ticket.eventTitle || ticket.eventSlug}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-zinc-200 p-4">
+            <div className="rounded-2xl border border-zinc-200 p-5">
               <p className="text-xs font-black uppercase text-zinc-500">
                 Ingresso
               </p>
-              <p className="mt-1 break-words text-sm font-black text-zinc-950">
+
+              <p className="mt-2 break-words font-black text-zinc-950">
                 {ticket.ticketName}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-zinc-200 p-4">
+            <div className="rounded-2xl border border-zinc-200 p-5">
               <p className="text-xs font-black uppercase text-zinc-500">
                 Cliente
               </p>
-              <p className="mt-1 break-words text-sm font-black text-zinc-950">
+
+              <p className="mt-2 break-words font-black text-zinc-950">
                 {ticket.customerName || "Nome não informado"}
               </p>
             </div>
 
-            <div className="rounded-2xl border border-zinc-200 p-4">
+            <div className="rounded-2xl border border-zinc-200 p-5">
               <p className="text-xs font-black uppercase text-zinc-500">
                 E-mail
               </p>
-              <p className="mt-1 break-words text-sm font-black text-zinc-950">
+
+              <p className="mt-2 break-words font-black text-zinc-950">
                 {ticket.customerEmail}
               </p>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+          <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
             <p className="text-xs font-black uppercase text-zinc-500">
               Código do ingresso
             </p>
@@ -133,26 +170,16 @@ export default async function TicketPage({
             </p>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <a
-              href={ticketUrl}
-              className="flex h-12 items-center justify-center rounded-2xl border border-zinc-300 bg-white px-4 text-center text-sm font-black text-zinc-950 transition hover:bg-zinc-100"
-            >
-              Visualizar ingresso
-            </a>
-
-            <a
-              href={pdfUrl}
-              download
-              className="flex h-12 items-center justify-center rounded-2xl bg-orange-500 px-4 text-center text-sm font-black text-black transition hover:bg-orange-400"
-            >
-              Baixar ingresso em PDF
-            </a>
-          </div>
+          <a
+            href={pdfUrl}
+            className="flex min-h-14 w-full items-center justify-center rounded-2xl bg-orange-500 px-5 text-center font-black text-black transition hover:bg-orange-400"
+          >
+            Baixar ingresso em PDF
+          </a>
 
           <a
             href="/"
-            className="flex h-12 items-center justify-center rounded-2xl border border-zinc-300 bg-white px-4 text-center text-sm font-black text-zinc-950 transition hover:bg-zinc-100"
+            className="flex min-h-14 w-full items-center justify-center rounded-2xl border border-zinc-300 bg-white px-5 text-center font-black text-zinc-950"
           >
             Voltar ao site
           </a>
