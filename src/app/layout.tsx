@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+
 import AppHeader from "@/components/AppHeader";
 import AppCartDrawer from "@/components/AppCartDrawer";
+import MetaPixel from "@/components/MetaPixel";
 
 export const metadata: Metadata = {
   title: "Clube do Ingresso",
@@ -16,8 +18,12 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
+        <MetaPixel />
+
         <AppHeader />
+
         {children}
+
         <AppCartDrawer />
       </body>
     </html>
