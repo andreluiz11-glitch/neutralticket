@@ -12,8 +12,11 @@ declare global {
 }
 
 export default function MetaPixel() {
-  const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+  const pixelId =
+    process.env.NEXT_PUBLIC_META_PIXEL_ID;
+
   const pathname = usePathname();
+
   const firstPage = useRef(true);
 
   useEffect(() => {
@@ -33,11 +36,15 @@ export default function MetaPixel() {
 
   return (
     <>
-      <Script id="meta-pixel" strategy="afterInteractive">
+      <Script
+        id="meta-pixel"
+        strategy="afterInteractive"
+      >
         {`
           !function(f,b,e,v,n,t,s)
           {
             if(f.fbq)return;
+
             n=f.fbq=function(){
               n.callMethod
                 ? n.callMethod.apply(n,arguments)
@@ -73,7 +80,9 @@ export default function MetaPixel() {
         <img
           height="1"
           width="1"
-          style={{ display: "none" }}
+          style={{
+            display: "none",
+          }}
           src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`}
           alt=""
         />
