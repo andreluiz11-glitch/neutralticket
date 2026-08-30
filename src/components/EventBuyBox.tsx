@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -198,19 +197,33 @@ const rivieraOptions: TicketOption[] = [
   },
 ];
 
-export default function EventBuyBox({ event }: EventBuyBoxProps) {
-  const [me, setMe] = useState<MeResponse["user"]>(null);
-  const [checkingUser, setCheckingUser] = useState(true);
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [loginPromptOpen, setLoginPromptOpen] = useState(false);
+export default function EventBuyBox({
+  event,
+}: EventBuyBoxProps) {
+  const [me, setMe] =
+    useState<MeResponse["user"]>(null);
+
+  const [checkingUser, setCheckingUser] =
+    useState(true);
+
+  const [cart, setCart] =
+    useState<CartItem[]>([]);
+
+  const [expanded, setExpanded] =
+    useState<string | null>(null);
+
+  const [loginPromptOpen, setLoginPromptOpen] =
+    useState(false);
 
   const options: TicketOption[] = useMemo(() => {
     if (isRivieraEvent(event.title)) {
       return rivieraOptions;
     }
 
-    if (Array.isArray(event.tickets) && event.tickets.length > 0) {
+    if (
+      Array.isArray(event.tickets) &&
+      event.tickets.length > 0
+    ) {
       return event.tickets.map((ticket) => ({
         name: ticket.name,
         price: ticket.price,
@@ -235,23 +248,35 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
 
   const total = cart
     .filter((item) => item.id === event.id)
-    .reduce((sum, item) => sum + item.unitPrice * item.qty, 0);
+    .reduce(
+      (sum, item) =>
+        sum + item.unitPrice * item.qty,
+      0
+    );
 
   const totalQty = cart
     .filter((item) => item.id === event.id)
-    .reduce((sum, item) => sum + item.qty, 0);
+    .reduce(
+      (sum, item) => sum + item.qty,
+      0
+    );
 
   useEffect(() => {
     setCart(getCart());
 
     async function loadUser() {
       try {
-        const res = await fetch("/api/auth/me", {
-          cache: "no-store",
-          credentials: "include",
-        });
+        const res = await fetch(
+          "/api/auth/me",
+          {
+            cache: "no-store",
+            credentials: "include",
+          }
+        );
 
-        const data: MeResponse = await res.json();
+        const data: MeResponse =
+          await res.json();
+
         setMe(data.user || null);
       } catch {
         setMe(null);
@@ -263,7 +288,8 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
     loadUser();
 
     function syncCart(event: Event) {
-      const customEvent = event as CustomEvent<CartItem[]>;
+      const customEvent =
+        event as CustomEvent<CartItem[]>;
 
       setCart(
         Array.isArray(customEvent.detail)
@@ -272,10 +298,16 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
       );
     }
 
-    window.addEventListener(CART_UPDATED_EVENT, syncCart);
+    window.addEventListener(
+      CART_UPDATED_EVENT,
+      syncCart
+    );
 
     return () => {
-      window.removeEventListener(CART_UPDATED_EVENT, syncCart);
+      window.removeEventListener(
+        CART_UPDATED_EVENT,
+        syncCart
+      );
     };
   }, []);
 
@@ -308,8 +340,12 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
     setCart(updated);
   }
 
-  function handleRemove(option: TicketOption) {
-    const currentQty = getQty(option.name);
+  function handleRemove(
+    option: TicketOption
+  ) {
+    const currentQty = getQty(
+      option.name
+    );
 
     if (currentQty <= 1) {
       const updated = removeCartItem(
@@ -367,13 +403,17 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
               {options.length === 0 ? (
                 <div className="rounded-2xl border border-zinc-200 bg-white p-5">
                   <p className="text-sm text-zinc-600">
-                    Nenhum ingresso cadastrado para este evento.
+                    Nenhum ingresso cadastrado
+                    para este evento.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {options.map((option) => {
-                    const qty = getQty(option.name);
+                    const qty = getQty(
+                      option.name
+                    );
+
                     const isExpanded =
                       expanded === option.name;
 
@@ -386,23 +426,37 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
                           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
                             <div className="min-w-0 flex-1">
                               <h3 className="break-words text-lg font-black uppercase leading-tight text-zinc-950 sm:text-xl">
-                                {option.name}
+                                {
+                                  option.name
+                                }
                               </h3>
 
                               <div className="mt-3 grid gap-1.5 text-xs font-semibold text-zinc-700 sm:grid-cols-2 sm:text-sm">
-                                {option.dates.map((date) => (
-                                  <span key={date}>
-                                    {date}
-                                  </span>
-                                ))}
+                                {option.dates.map(
+                                  (date) => (
+                                    <span
+                                      key={
+                                        date
+                                      }
+                                    >
+                                      {
+                                        date
+                                      }
+                                    </span>
+                                  )
+                                )}
                               </div>
 
                               <p className="mt-3 text-sm text-zinc-500">
-                                {option.batch}
+                                {
+                                  option.batch
+                                }
                               </p>
 
                               <p className="mt-4 text-xl font-black text-zinc-950 sm:text-2xl">
-                                {formatBRL(option.price)}
+                                {formatBRL(
+                                  option.price
+                                )}
                               </p>
                             </div>
 
@@ -411,16 +465,20 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
                                 type="button"
                                 variant="outline"
                                 size="icon"
-                                disabled={qty === 0}
-                                onClick={() =>
-                                  handleRemove(option)
+                                disabled={
+                                  qty === 0
                                 }
-                                className="h-11 w-11 shrink-0 rounded-xl"
+                                onClick={() =>
+                                  handleRemove(
+                                    option
+                                  )
+                                }
+                                className="h-11 w-11 shrink-0 rounded-xl border border-zinc-400 bg-white text-zinc-950"
                               >
                                 <Minus className="size-4" />
                               </Button>
 
-                              <span className="w-8 text-center text-xl font-semibold">
+                              <span className="w-8 text-center text-xl font-semibold text-zinc-950">
                                 {qty}
                               </span>
 
@@ -428,7 +486,9 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
                                 type="button"
                                 size="icon"
                                 onClick={() =>
-                                  handleAdd(option)
+                                  handleAdd(
+                                    option
+                                  )
                                 }
                                 className="h-11 w-11 shrink-0 rounded-xl bg-orange-500 text-black hover:bg-orange-400"
                               >
@@ -439,7 +499,8 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
                         </div>
 
                         {option.details &&
-                          option.details.length > 0 && (
+                          option.details.length >
+                            0 && (
                             <div className="border-t border-zinc-200">
                               <button
                                 type="button"
@@ -468,7 +529,9 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
                               {isExpanded && (
                                 <div className="grid gap-3 border-t border-zinc-200 bg-zinc-50 p-3 sm:p-4 lg:grid-cols-2">
                                   {option.details.map(
-                                    (detail) => (
+                                    (
+                                      detail
+                                    ) => (
                                       <div
                                         key={`${option.name}-${detail.title}`}
                                         className="flex min-w-0 gap-3 rounded-xl border border-zinc-200 bg-white p-3"
@@ -520,7 +583,7 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
                   Adicionar código ou cupom
                 </button>
 
-                <div className="rounded-2xl border border-zinc-200 bg-white p-4">
+                <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
                   <p className="text-sm font-semibold text-zinc-500">
                     Resumo da compra
                   </p>
@@ -541,13 +604,17 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
                     </span>
 
                     <strong className="text-lg text-zinc-950">
-                      {formatBRL(total)}
+                      {formatBRL(
+                        total
+                      )}
                     </strong>
                   </div>
 
                   <Button
                     type="button"
-                    disabled={totalQty === 0}
+                    disabled={
+                      totalQty === 0
+                    }
                     onClick={openCart}
                     className="mt-5 min-h-12 w-full rounded-xl bg-orange-500 px-4 text-sm font-black uppercase text-black hover:bg-orange-400 disabled:bg-zinc-200 disabled:text-zinc-500"
                   >
@@ -563,39 +630,50 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
 
       <Dialog
         open={loginPromptOpen}
-        onOpenChange={setLoginPromptOpen}
+        onOpenChange={
+          setLoginPromptOpen
+        }
       >
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              Entre para continuar
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="w-[calc(100%-32px)] max-w-md overflow-hidden rounded-2xl border-2 border-zinc-300 bg-white p-0 text-zinc-950 opacity-100 shadow-2xl sm:rounded-3xl">
+          <div className="bg-white px-5 pb-5 pt-7 sm:px-7 sm:pb-6 sm:pt-8">
+            <DialogHeader className="space-y-3 text-center sm:text-center">
+              <DialogTitle className="text-center text-2xl font-black text-zinc-950">
+                Entre para continuar
+              </DialogTitle>
 
-          <p className="text-sm text-zinc-600">
-            Entre com seu e-mail e senha ou crie uma conta.
-          </p>
+              <p className="text-center text-sm leading-6 text-zinc-600 sm:text-base">
+                Entre com seu e-mail e
+                senha ou crie uma conta
+                para continuar sua compra.
+              </p>
+            </DialogHeader>
+          </div>
 
-          <DialogFooter className="gap-2 sm:gap-2">
+          <div className="grid gap-3 border-t border-zinc-200 bg-white px-5 py-5 sm:grid-cols-2 sm:px-7">
             <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                window.location.href =
+                  "/login";
+              }}
+              className="h-12 w-full rounded-xl border-2 border-zinc-900 bg-white text-base font-bold text-zinc-950 shadow-none hover:bg-zinc-100"
+            >
+              Entrar
+            </Button>
+
+            <Button
+              type="button"
               variant="outline"
               onClick={() => {
                 window.location.href =
                   "/signup";
               }}
+              className="h-12 w-full rounded-xl border-2 border-zinc-900 bg-white text-base font-bold text-zinc-950 shadow-none hover:bg-zinc-100"
             >
               Criar conta
             </Button>
-
-            <Button
-              onClick={() => {
-                window.location.href =
-                  "/login";
-              }}
-            >
-              Entrar
-            </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </>
