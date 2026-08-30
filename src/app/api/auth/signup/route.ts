@@ -5,28 +5,66 @@ import { signJwt } from "@/lib/jwt";
 
 const COOKIE_NAME = "nt_session";
 
+type SignupBody = {
+  name?: string;
+  email?: string;
+  password?: string;
+};
+
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json();
+    const body = (await req.json()) as SignupBody;
+
+    const name = body.name?.trim() || null;
+    const email = body.email?.trim().toLowerCase();
+    const password = body.password?.trim();
 
     if (!email || !password) {
-      return NextResponse.json({ error: "Email e senha são obrigatórios." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Email e senha são obrigatórios." },
+        { status: 400 }
+      );
     }
 
-    const exists = await prisma.user.findUnique({ where: { email } });
+    const exists = await prisma.user.findUnique({
+      where: { email },
+    });
+
     if (exists) {
-      return NextResponse.json({ error: "Email já cadastrado." }, { status: 409 });
+      return NextResponse.json(
+        { error: "Email já cadastrado." },
+        { status: 409 }
+      );
     }
 
     const passwordHash = await hashPassword(password);
+
     const user = await prisma.user.create({
-      data: { name, email, passwordHash },
-      select: { id: true, email: true },
+      data: {
+        name,
+        email,
+        passwordHash,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+      },
     });
 
-    const token = await signJwt({ sub: user.id, email: user.email });
+    const token = await signJwt({
+      sub: user.id,
+      email: user.email,
+    });
 
-    const res = NextResponse.json({ message: "Usuário criado com sucesso!" });
+    const res = NextResponse.json(
+      {
+        message: "Usuário criado com sucesso!",
+        user,
+      },
+      { status: 201 }
+    );
+
     res.cookies.set({
       name: COOKIE_NAME,
       value: token,
@@ -36,8 +74,17 @@ export async function POST(req: Request) {
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
     });
+
     return res;
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || "Erro no cadastro." }, { status: 500 });
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Erro no cadastro.";
+
+    return NextResponse.json(
+      { error: message },
+      { status: 500 }
+    );
   }
 }

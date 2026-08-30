@@ -1,27 +1,70 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { verifyPassword } from "@/lib/hash";
+import { hashPassword, verifyPassword } from "@/lib/hash";
 import { signJwt } from "@/lib/jwt";
 
 const COOKIE_NAME = "nt_session";
 
+type LoginBody = {
+  email?: string;
+  password?: string;
+};
+
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json();
+    const body = (await req.json()) as LoginBody;
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const email = body.email?.trim().toLowerCase();
+    const password = body.password?.trim();
+
+    if (!email || !password) {
+      return NextResponse.json(
+        { error: "Email e senha são obrigatórios." },
+        { status: 400 }
+      );
+    }
+
+    let user = await prisma.user.findUnique({
+      where: { email },
+    });
+
     if (!user) {
-      return NextResponse.json({ error: "Usuário não encontrado." }, { status: 404 });
+      const passwordHash = await hashPassword(password);
+
+      user = await prisma.user.create({
+        data: {
+          email,
+          passwordHash,
+        },
+      });
+    } else {
+      const passwordOk = await verifyPassword(
+        password,
+        user.passwordHash
+      );
+
+      if (!passwordOk) {
+        return NextResponse.json(
+          { error: "Senha incorreta." },
+          { status: 401 }
+        );
+      }
     }
 
-    const ok = await verifyPassword(password, user.passwordHash);
-    if (!ok) {
-      return NextResponse.json({ error: "Senha incorreta." }, { status: 401 });
-    }
+    const token = await signJwt({
+      sub: user.id,
+      email: user.email,
+    });
 
-    const token = await signJwt({ sub: user.id, email: user.email });
+    const res = NextResponse.json({
+      message: "Login realizado com sucesso!",
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+    });
 
-    const res = NextResponse.json({ message: "Login realizado com sucesso!" });
     res.cookies.set({
       name: COOKIE_NAME,
       value: token,
@@ -29,10 +72,19 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 dias
+      maxAge: 60 * 60 * 24 * 7,
     });
+
     return res;
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || "Erro no login." }, { status: 500 });
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Erro no login.";
+
+    return NextResponse.json(
+      { error: message },
+      { status: 500 }
+    );
   }
 }
