@@ -246,33 +246,30 @@ export default function EventBuyBox({
     return [];
   }, [event]);
 
-  const total = cart
-    .filter((item) => item.id === event.id)
-    .reduce(
-      (sum, item) =>
-        sum + item.unitPrice * item.qty,
-      0
-    );
+  const eventCartItems = cart.filter(
+    (item) => item.id === event.id
+  );
 
-  const totalQty = cart
-    .filter((item) => item.id === event.id)
-    .reduce(
-      (sum, item) => sum + item.qty,
-      0
-    );
+  const total = eventCartItems.reduce(
+    (sum, item) =>
+      sum + item.unitPrice * item.qty,
+    0
+  );
+
+  const totalQty = eventCartItems.reduce(
+    (sum, item) => sum + item.qty,
+    0
+  );
 
   useEffect(() => {
     setCart(getCart());
 
     async function loadUser() {
       try {
-        const res = await fetch(
-          "/api/auth/me",
-          {
-            cache: "no-store",
-            credentials: "include",
-          }
-        );
+        const res = await fetch("/api/auth/me", {
+          cache: "no-store",
+          credentials: "include",
+        });
 
         const data: MeResponse =
           await res.json();
@@ -340,12 +337,8 @@ export default function EventBuyBox({
     setCart(updated);
   }
 
-  function handleRemove(
-    option: TicketOption
-  ) {
-    const currentQty = getQty(
-      option.name
-    );
+  function handleRemove(option: TicketOption) {
+    const currentQty = getQty(option.name);
 
     if (currentQty <= 1) {
       const updated = removeCartItem(
@@ -368,13 +361,15 @@ export default function EventBuyBox({
 
   return (
     <>
-      <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm sm:rounded-3xl">
+      <section className="w-full min-w-0 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm sm:rounded-3xl">
+        
+        {/* CABEÇALHO */}
         <div className="flex flex-col gap-3 border-b border-zinc-200 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
           <h2 className="text-lg font-black uppercase text-zinc-950 sm:text-xl">
             Ingressos
           </h2>
 
-          <div className="flex flex-wrap gap-4 text-sm font-semibold text-zinc-700">
+          <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold text-zinc-700">
             <button
               type="button"
               className="transition hover:text-orange-500"
@@ -391,8 +386,11 @@ export default function EventBuyBox({
           </div>
         </div>
 
-        <div className="bg-zinc-50 p-3 sm:p-5 lg:p-6">
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+        {/* CONTEÚDO */}
+        <div className="min-w-0 bg-zinc-50 p-3 sm:p-5 lg:p-6">
+          <div className="space-y-5">
+            
+            {/* CATEGORIA */}
             <div className="min-w-0">
               <div className="mb-4 inline-flex rounded-xl border border-orange-500 bg-orange-50 px-5 py-3">
                 <span className="text-sm font-black uppercase tracking-wide text-zinc-950 sm:text-base">
@@ -400,6 +398,7 @@ export default function EventBuyBox({
                 </span>
               </div>
 
+              {/* OPÇÕES */}
               {options.length === 0 ? (
                 <div className="rounded-2xl border border-zinc-200 bg-white p-5">
                   <p className="text-sm text-zinc-600">
@@ -410,9 +409,7 @@ export default function EventBuyBox({
               ) : (
                 <div className="space-y-4">
                   {options.map((option) => {
-                    const qty = getQty(
-                      option.name
-                    );
+                    const qty = getQty(option.name);
 
                     const isExpanded =
                       expanded === option.name;
@@ -420,58 +417,49 @@ export default function EventBuyBox({
                     return (
                       <div
                         key={option.name}
-                        className="overflow-hidden rounded-2xl border border-zinc-200 bg-white"
+                        className="min-w-0 overflow-hidden rounded-2xl border border-zinc-200 bg-white"
                       >
+                        
+                        {/* INGRESSO */}
                         <div className="p-4 sm:p-5">
-                          <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                          <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                            
                             <div className="min-w-0 flex-1">
                               <h3 className="break-words text-lg font-black uppercase leading-tight text-zinc-950 sm:text-xl">
-                                {
-                                  option.name
-                                }
+                                {option.name}
                               </h3>
 
-                              <div className="mt-3 grid gap-1.5 text-xs font-semibold text-zinc-700 sm:grid-cols-2 sm:text-sm">
+                              <div className="mt-3 grid min-w-0 gap-1.5 text-xs font-semibold text-zinc-700 sm:text-sm">
                                 {option.dates.map(
                                   (date) => (
                                     <span
-                                      key={
-                                        date
-                                      }
+                                      key={date}
+                                      className="break-words"
                                     >
-                                      {
-                                        date
-                                      }
+                                      {date}
                                     </span>
                                   )
                                 )}
                               </div>
 
-                              <p className="mt-3 text-sm text-zinc-500">
-                                {
-                                  option.batch
-                                }
+                              <p className="mt-3 break-words text-sm text-zinc-500">
+                                {option.batch}
                               </p>
 
                               <p className="mt-4 text-xl font-black text-zinc-950 sm:text-2xl">
-                                {formatBRL(
-                                  option.price
-                                )}
+                                {formatBRL(option.price)}
                               </p>
                             </div>
 
-                            <div className="flex items-center justify-between gap-3 lg:justify-end">
+                            {/* QUANTIDADE */}
+                            <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
                               <Button
                                 type="button"
                                 variant="outline"
                                 size="icon"
-                                disabled={
-                                  qty === 0
-                                }
+                                disabled={qty === 0}
                                 onClick={() =>
-                                  handleRemove(
-                                    option
-                                  )
+                                  handleRemove(option)
                                 }
                                 className="h-11 w-11 shrink-0 rounded-xl border border-zinc-400 bg-white text-zinc-950"
                               >
@@ -486,9 +474,7 @@ export default function EventBuyBox({
                                 type="button"
                                 size="icon"
                                 onClick={() =>
-                                  handleAdd(
-                                    option
-                                  )
+                                  handleAdd(option)
                                 }
                                 className="h-11 w-11 shrink-0 rounded-xl bg-orange-500 text-black hover:bg-orange-400"
                               >
@@ -498,9 +484,9 @@ export default function EventBuyBox({
                           </div>
                         </div>
 
+                        {/* DETALHES */}
                         {option.details &&
-                          option.details.length >
-                            0 && (
+                          option.details.length > 0 && (
                             <div className="border-t border-zinc-200">
                               <button
                                 type="button"
@@ -511,14 +497,14 @@ export default function EventBuyBox({
                                       : option.name
                                   )
                                 }
-                                className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 sm:px-5"
+                                className="flex min-h-12 w-full items-center justify-between gap-4 px-4 py-3 text-left text-sm font-bold text-zinc-700 transition hover:bg-zinc-50 sm:px-5"
                               >
                                 <span>
                                   Ver detalhes
                                 </span>
 
                                 <ChevronDown
-                                  className={`size-5 text-orange-500 transition ${
+                                  className={`size-5 shrink-0 text-orange-500 transition ${
                                     isExpanded
                                       ? "rotate-180"
                                       : ""
@@ -527,11 +513,9 @@ export default function EventBuyBox({
                               </button>
 
                               {isExpanded && (
-                                <div className="grid gap-3 border-t border-zinc-200 bg-zinc-50 p-3 sm:p-4 lg:grid-cols-2">
+                                <div className="grid min-w-0 gap-3 border-t border-zinc-200 bg-zinc-50 p-3 sm:p-4">
                                   {option.details.map(
-                                    (
-                                      detail
-                                    ) => (
+                                    (detail) => (
                                       <div
                                         key={`${option.name}-${detail.title}`}
                                         className="flex min-w-0 gap-3 rounded-xl border border-zinc-200 bg-white p-3"
@@ -542,9 +526,7 @@ export default function EventBuyBox({
 
                                         <div className="min-w-0">
                                           <p className="break-words text-xs font-black uppercase leading-relaxed text-zinc-950 sm:text-sm">
-                                            {
-                                              detail.title
-                                            }
+                                            {detail.title}
                                           </p>
 
                                           <p className="mt-1 text-xs font-medium text-zinc-500">
@@ -554,10 +536,8 @@ export default function EventBuyBox({
                                               : "1 item"}
                                           </p>
 
-                                          <p className="mt-2 text-xs font-semibold text-zinc-700 sm:text-sm">
-                                            {
-                                              detail.date
-                                            }
+                                          <p className="mt-2 break-words text-xs font-semibold text-zinc-700 sm:text-sm">
+                                            {detail.date}
                                           </p>
                                         </div>
                                       </div>
@@ -574,26 +554,30 @@ export default function EventBuyBox({
               )}
             </div>
 
-            <aside className="min-w-0">
-              <div className="sticky top-4 space-y-4">
+            {/* ÁREA INFERIOR */}
+            <div className="min-w-0 border-t border-zinc-200 pt-5">
+              <div className="space-y-4">
+                
+                {/* CUPOM */}
                 <button
                   type="button"
-                  className="flex min-h-12 w-full items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm font-bold text-zinc-950 transition hover:bg-zinc-100"
+                  className="flex min-h-12 w-full items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 py-3 text-center text-sm font-bold text-zinc-950 transition hover:bg-zinc-100"
                 >
                   Adicionar código ou cupom
                 </button>
 
-                <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+                {/* RESUMO */}
+                <div className="min-w-0 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5">
                   <p className="text-sm font-semibold text-zinc-500">
                     Resumo da compra
                   </p>
 
                   <div className="mt-4 flex items-center justify-between gap-4 text-sm">
-                    <span>
+                    <span className="min-w-0 break-words">
                       Ingressos selecionados
                     </span>
 
-                    <strong>
+                    <strong className="shrink-0">
                       {totalQty}
                     </strong>
                   </div>
@@ -603,18 +587,14 @@ export default function EventBuyBox({
                       Total
                     </span>
 
-                    <strong className="text-lg text-zinc-950">
-                      {formatBRL(
-                        total
-                      )}
+                    <strong className="shrink-0 text-lg text-zinc-950">
+                      {formatBRL(total)}
                     </strong>
                   </div>
 
                   <Button
                     type="button"
-                    disabled={
-                      totalQty === 0
-                    }
+                    disabled={totalQty === 0}
                     onClick={openCart}
                     className="mt-5 min-h-12 w-full rounded-xl bg-orange-500 px-4 text-sm font-black uppercase text-black hover:bg-orange-400 disabled:bg-zinc-200 disabled:text-zinc-500"
                   >
@@ -623,18 +603,18 @@ export default function EventBuyBox({
                   </Button>
                 </div>
               </div>
-            </aside>
+            </div>
           </div>
         </div>
       </section>
 
+      {/* LOGIN */}
       <Dialog
         open={loginPromptOpen}
-        onOpenChange={
-          setLoginPromptOpen
-        }
+        onOpenChange={setLoginPromptOpen}
       >
         <DialogContent className="w-[calc(100%-32px)] max-w-md overflow-hidden rounded-2xl border-2 border-zinc-300 bg-white p-0 text-zinc-950 opacity-100 shadow-2xl sm:rounded-3xl">
+          
           <div className="bg-white px-5 pb-5 pt-7 sm:px-7 sm:pb-6 sm:pt-8">
             <DialogHeader className="space-y-3 text-center sm:text-center">
               <DialogTitle className="text-center text-2xl font-black text-zinc-950">
@@ -650,12 +630,12 @@ export default function EventBuyBox({
           </div>
 
           <div className="grid gap-3 border-t border-zinc-200 bg-white px-5 py-5 sm:grid-cols-2 sm:px-7">
+            
             <Button
               type="button"
               variant="outline"
               onClick={() => {
-                window.location.href =
-                  "/login";
+                window.location.href = "/login";
               }}
               className="h-12 w-full rounded-xl border-2 border-zinc-900 bg-white text-base font-bold text-zinc-950 shadow-none hover:bg-zinc-100"
             >
@@ -666,13 +646,13 @@ export default function EventBuyBox({
               type="button"
               variant="outline"
               onClick={() => {
-                window.location.href =
-                  "/signup";
+                window.location.href = "/signup";
               }}
               className="h-12 w-full rounded-xl border-2 border-zinc-900 bg-white text-base font-bold text-zinc-950 shadow-none hover:bg-zinc-100"
             >
               Criar conta
             </Button>
+
           </div>
         </DialogContent>
       </Dialog>
