@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: false,
   },
   serverExternalPackages: ["pdfkit"],
+  outputFileTracingIncludes: {
+    "/*": ["./node_modules/pdfkit/js/standard-fonts/**/*"],
+  },
 };
 
 export default nextConfig;
