@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { hasValidAdminSession } from "@/lib/adminAuth";
 import {
   deleteEventBySlug,
   getEventBySlug,
@@ -50,6 +51,13 @@ export async function PUT(
   }
 ) {
   try {
+    if (!(await hasValidAdminSession())) {
+      return NextResponse.json(
+        { error: "Acesso não autorizado." },
+        { status: 401 }
+      );
+    }
+
     const { slug } = await context.params;
 
     if (!slug) {
@@ -84,6 +92,13 @@ export async function DELETE(
   }
 ) {
   try {
+    if (!(await hasValidAdminSession())) {
+      return NextResponse.json(
+        { error: "Acesso não autorizado." },
+        { status: 401 }
+      );
+    }
+
     const { slug } = await context.params;
 
     if (!slug) {

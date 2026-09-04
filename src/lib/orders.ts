@@ -1,4 +1,4 @@
-import { randomBytes } from "crypto";
+import { getEventBySlug } from "@/lib/events";
 import { prisma } from "@/lib/prisma";
 
 export type OrderStatus =
@@ -40,30 +40,92 @@ function createPixTxid(orderId: string) {
   return orderId.replace(/[^a-zA-Z0-9]/g, "").slice(0, 25).toUpperCase();
 }
 
-function normalizeItems(items: unknown): OrderItem[] {
+type RequestedOrderItem = {
+  id: string;
+  ticketName: string;
+  qty: number;
+};
+
+function normalizeRequestedItems(items: unknown): RequestedOrderItem[] {
   if (!Array.isArray(items)) return [];
 
   return items
     .filter(
-      (item: any) =>
-        item &&
-        typeof item === "object" &&
-        typeof item.id === "string" &&
-        typeof item.title === "string" &&
-        typeof item.ticketName === "string" &&
-        typeof item.unitPrice === "number" &&
-        typeof item.qty === "number"
+      (item: unknown): item is Record<string, unknown> =>
+        Boolean(item) && typeof item === "object"
     )
-    .map((item: any) => ({
-      id: String(item.id),
-      title: String(item.title),
-      date: item.date ? String(item.date) : undefined,
-      location: item.location ? String(item.location) : undefined,
-      ticketName: String(item.ticketName),
-      unitPrice: Number(item.unitPrice),
-      qty: Math.max(1, Math.floor(Number(item.qty) || 1)),
+    .map((item) => ({
+      id: String(item.id || "").trim(),
+      ticketName: String(item.ticketName || "").trim(),
+      qty: Math.floor(Number(item.qty) || 0),
     }))
-    .filter((item) => item.unitPrice > 0 && item.qty > 0);
+    .filter(
+      (item) =>
+        item.id.length > 0 &&
+        item.ticketName.length > 0 &&
+        item.qty > 0 &&
+        item.qty <= 10
+    )
+    .slice(0, 20);
+}
+
+async function canonicalizeItems(items: unknown): Promise<OrderItem[]> {
+  const requestedItems = normalizeRequestedItems(items);
+
+  if (requestedItems.length === 0) {
+    return [];
+  }
+
+  const canonicalItems = await Promise.all(
+    requestedItems.map(async (requested) => {
+      const event = await getEventBySlug(requested.id);
+
+      if (!event) {
+        throw new Error("Um dos eventos do carrinho não está mais disponível.");
+      }
+
+      const ticket = event.tickets?.find(
+        (candidate) =>
+          candidate.name.trim().toLocaleLowerCase("pt-BR") ===
+          requested.ticketName.toLocaleLowerCase("pt-BR")
+      );
+      const fallbackPrice = Number(event.price || 0);
+      const unitPrice = Number(ticket?.price ?? fallbackPrice);
+
+      if ((!ticket && (event.tickets?.length || 0) > 0) || unitPrice <= 0) {
+        throw new Error("Um dos ingressos do carrinho não está mais disponível.");
+      }
+
+      return {
+        id: event.slug || requested.id,
+        title: event.title,
+        date: event.date,
+        location: event.location,
+        ticketName: ticket?.name || requested.ticketName,
+        unitPrice,
+        qty: requested.qty,
+      } satisfies OrderItem;
+    })
+  );
+
+  return canonicalItems.reduce<OrderItem[]>((result, item) => {
+    const existing = result.find(
+      (candidate) =>
+        candidate.id === item.id && candidate.ticketName === item.ticketName
+    );
+
+    if (!existing) {
+      result.push({ ...item });
+      return result;
+    }
+
+    if (existing.qty + item.qty > 10) {
+      throw new Error("O limite é de 10 ingressos por tipo em cada pedido.");
+    }
+
+    existing.qty += item.qty;
+    return result;
+  }, []);
 }
 
 function toCents(value: number) {
@@ -144,17 +206,38 @@ export async function getOrderById(id: string): Promise<Order | null> {
   return mapOrder(order);
 }
 
+export async function getOrderByIdForUser(
+  id: string,
+  userId: string
+): Promise<Order | null> {
+  const order = await prisma.order.findFirst({
+    where: {
+      id,
+      userId,
+    },
+    include: {
+      items: true,
+    },
+  });
+
+  return order ? mapOrder(order) : null;
+}
+
 export async function createManualPixOrder(input: {
-  customer: OrderCustomer;
+  userId: string;
   items: unknown;
 }): Promise<Order> {
-  const email = String(input.customer.email || "").trim().toLowerCase();
+  const user = await prisma.user.findUnique({
+    where: {
+      id: input.userId,
+    },
+  });
 
-  if (!email) {
-    throw new Error("E-mail do cliente é obrigatório.");
+  if (!user) {
+    throw new Error("Sessão inválida. Entre novamente para continuar.");
   }
 
-  const items = normalizeItems(input.items);
+  const items = await canonicalizeItems(input.items);
 
   if (items.length === 0) {
     throw new Error("Carrinho vazio.");
@@ -169,27 +252,11 @@ export async function createManualPixOrder(input: {
     throw new Error("Valor inválido.");
   }
 
-  let user = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-  });
-
-  if (!user) {
-    user = await prisma.user.create({
-      data: {
-        email,
-        name: input.customer.name || null,
-        passwordHash: randomBytes(16).toString("hex"),
-      },
-    });
-  }
-
   const created = await prisma.order.create({
     data: {
       userId: user.id,
-      customerName: input.customer.name || user.name || null,
-      customerEmail: email,
+      customerName: user.name || null,
+      customerEmail: user.email,
       status: "pending",
       paymentMethod: "manual_pix",
       total: toCents(amount),

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { CheckCircle2, Search, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -53,11 +54,36 @@ function getStatusClass(status: string) {
 }
 
 export default function AdminValidateTicketPage() {
+  const router = useRouter();
+  const [checkingAccess, setCheckingAccess] = useState(true);
   const [code, setCode] = useState("");
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState(false);
   const [usingTicket, setUsingTicket] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function checkAccess() {
+      try {
+        const response = await fetch("/api/admin/session", {
+          cache: "no-store",
+          credentials: "include",
+        });
+        const data = await response.json();
+
+        if (!response.ok || !data?.authenticated) {
+          router.replace("/admin");
+          return;
+        }
+
+        setCheckingAccess(false);
+      } catch {
+        router.replace("/admin");
+      }
+    }
+
+    checkAccess();
+  }, [router]);
 
   async function searchTicket(event?: React.FormEvent<HTMLFormElement>) {
     event?.preventDefault();
@@ -127,6 +153,16 @@ export default function AdminValidateTicketPage() {
     } finally {
       setUsingTicket(false);
     }
+  }
+
+  if (checkingAccess) {
+    return (
+      <main className="min-h-screen bg-zinc-950 px-4 py-16 text-white">
+        <div className="mx-auto max-w-4xl text-sm font-bold text-zinc-400">
+          Verificando acesso...
+        </div>
+      </main>
+    );
   }
 
   return (

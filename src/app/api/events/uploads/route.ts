@@ -2,11 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
+import { hasValidAdminSession } from "@/lib/adminAuth";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
+    if (!(await hasValidAdminSession())) {
+      return NextResponse.json(
+        { error: "Acesso não autorizado." },
+        { status: 401 }
+      );
+    }
+
     const formData = await req.formData();
     const file = formData.get("file");
 
@@ -22,6 +30,13 @@ export async function POST(req: NextRequest) {
 
     const bytes = await (f as File).arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    if (buffer.byteLength > 5 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: "A imagem deve ter no máximo 5 MB." },
+        { status: 413 }
+      );
+    }
 
     const uploadsDir = path.join(process.cwd(), "public", "uploads");
     await mkdir(uploadsDir, { recursive: true });

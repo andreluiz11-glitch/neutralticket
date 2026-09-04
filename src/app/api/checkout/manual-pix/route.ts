@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getAuthenticatedUserId } from "@/lib/cookies";
 import { createManualPixOrder } from "@/lib/orders";
 import { buildPixPayload, generatePixQrCodeDataUrl } from "@/lib/pix";
 
@@ -6,6 +7,15 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
+    const userId = await getAuthenticatedUserId();
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Entre na sua conta para finalizar a compra." },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     const pixKey = process.env.PIX_KEY;
@@ -22,10 +32,7 @@ export async function POST(request: Request) {
     }
 
     const order = await createManualPixOrder({
-      customer: {
-        name: body?.customer?.name || null,
-        email: body?.customer?.email || "",
-      },
+      userId,
       items: body?.items,
     });
 

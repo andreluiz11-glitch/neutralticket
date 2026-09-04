@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { hasValidAdminSession } from "@/lib/adminAuth";
 import { getOrderById } from "@/lib/orders";
 import { getTicketsByOrderId } from "@/lib/tickets";
 
@@ -11,6 +12,13 @@ export async function GET(
   }
 ) {
   try {
+    if (!(await hasValidAdminSession())) {
+      return NextResponse.json(
+        { error: "Acesso não autorizado." },
+        { status: 401 }
+      );
+    }
+
     const { orderId } = await context.params;
 
     if (!orderId) {

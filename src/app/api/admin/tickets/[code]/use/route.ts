@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { hasValidAdminSession } from "@/lib/adminAuth";
 import { markTicketAsUsed } from "@/lib/tickets";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +11,13 @@ export async function POST(
   }
 ) {
   try {
+    if (!(await hasValidAdminSession())) {
+      return NextResponse.json(
+        { error: "Acesso não autorizado." },
+        { status: 401 }
+      );
+    }
+
     const { code } = await context.params;
 
     if (!code) {
@@ -42,6 +50,10 @@ export async function POST(
 }
 
 export async function GET() {
+  if (!(await hasValidAdminSession())) {
+    return NextResponse.json({ error: "Acesso não autorizado." }, { status: 401 });
+  }
+
   return NextResponse.json(
     {
       status: "ok",

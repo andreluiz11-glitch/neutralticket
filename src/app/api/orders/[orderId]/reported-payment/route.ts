@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getOrderById, updateOrderStatus } from "@/lib/orders";
+import { getAuthenticatedUserId } from "@/lib/cookies";
+import { getOrderByIdForUser, updateOrderStatus } from "@/lib/orders";
 
 export const dynamic = "force-dynamic";
 
@@ -9,6 +10,12 @@ export async function POST(
     params: Promise<{ orderId: string }>;
   }
 ) {
+  const userId = await getAuthenticatedUserId();
+
+  if (!userId) {
+    return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+  }
+
   const { orderId } = await context.params;
 
   if (!orderId) {
@@ -18,7 +25,7 @@ export async function POST(
     );
   }
 
-  const currentOrder = await getOrderById(orderId);
+  const currentOrder = await getOrderByIdForUser(orderId, userId);
 
   if (!currentOrder) {
     return NextResponse.json(
@@ -29,6 +36,17 @@ export async function POST(
 
   if (currentOrder.status === "PAID" || currentOrder.status === "TICKET_SENT") {
     return NextResponse.json({ order: currentOrder });
+  }
+
+  if (currentOrder.status === "PAYMENT_REPORTED") {
+    return NextResponse.json({ order: currentOrder });
+  }
+
+  if (currentOrder.status === "CANCELED") {
+    return NextResponse.json(
+      { error: "Este pedido está cancelado." },
+      { status: 409 }
+    );
   }
 
   const order = await updateOrderStatus(orderId, "PAYMENT_REPORTED");

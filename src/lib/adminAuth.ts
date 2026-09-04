@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "crypto";
+import { cookies } from "next/headers";
 
 export const ADMIN_COOKIE_NAME = "admin_panel_session";
 export const ADMIN_SESSION_MAX_AGE = 60 * 60 * 4;
@@ -66,4 +67,11 @@ export function isValidAdminToken(token?: string) {
   } catch {
     return false;
   }
+}
+
+export async function hasValidAdminSession() {
+  const store = await cookies();
+  const token = store.get(ADMIN_COOKIE_NAME)?.value;
+
+  return isValidAdminToken(token);
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { hasValidAdminSession } from "@/lib/adminAuth";
 import { getEvents, upsertEventBySlug } from "@/lib/events";
 
 // GET /api/events → retorna todos os eventos
@@ -17,6 +18,13 @@ export async function GET() {
 // POST /api/events → cria/atualiza por slug (se não enviar slug, geramos a partir do título)
 export async function POST(req: Request) {
   try {
+    if (!(await hasValidAdminSession())) {
+      return NextResponse.json(
+        { error: "Acesso não autorizado." },
+        { status: 401 }
+      );
+    }
+
     const payload = await req.json();
     if (!payload || !payload.title) {
       return NextResponse.json(

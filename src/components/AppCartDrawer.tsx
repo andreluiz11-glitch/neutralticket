@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CheckCircle2, Copy, Minus, Plus, Ticket, Trash2 } from "lucide-react";
+import {
+  CheckCircle2,
+  Copy,
+  Minus,
+  Plus,
+  ShoppingBag,
+  Ticket,
+  Trash2,
+} from "lucide-react";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -57,6 +66,7 @@ const formatDate = (iso?: string) =>
     : "Data não informada";
 
 export default function AppCartDrawer() {
+  const pathname = usePathname();
   const pixTextAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const [open, setOpen] = useState(false);
@@ -200,10 +210,6 @@ export default function AppCartDrawer() {
         credentials: "include",
         body: JSON.stringify({
           items: cart,
-          customer: {
-            name: currentUser.name || null,
-            email: currentUser.email,
-          },
         }),
       });
 
@@ -254,19 +260,26 @@ export default function AppCartDrawer() {
     }
   }
 
+  if (pathname.startsWith("/admin") || pathname.startsWith("/api")) {
+    return null;
+  }
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className="flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden border-l border-zinc-200 bg-white p-0 text-zinc-950 shadow-2xl sm:max-w-[460px]">
-        <SheetHeader className="shrink-0 border-b border-zinc-200 bg-white px-5 py-5">
-          <SheetTitle className="text-xl font-black text-zinc-950">
-            {manualPix ? "Pagamento via Pix" : "Seu carrinho"}
+      <SheetContent className="flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden border-l border-[#e8e3eb] bg-white p-0 text-[#17111f] shadow-[0_0_80px_rgba(23,17,31,0.2)] sm:max-w-[480px]">
+        <SheetHeader className="shrink-0 border-b border-[#e8e3eb] bg-white px-5 py-5 sm:px-6">
+          <SheetTitle className="flex items-center gap-3 text-[1.35rem] font-black tracking-[-0.03em] text-[#17111f]">
+            <span className="grid size-10 place-items-center rounded-full bg-[#fff2ee] text-[#f24423]">
+              <ShoppingBag className="size-[18px]" />
+            </span>
+            {manualPix ? "Pagamento via Pix" : "Sua sacola"}
           </SheetTitle>
         </SheetHeader>
 
         {manualPix ? (
           <div className="flex min-h-0 flex-1 flex-col bg-white">
             <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-5 sm:px-5">
-              <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4">
+              <div className="rounded-2xl border border-[#ffd8cc] bg-[#fff3ef] p-4">
                 <p className="text-sm font-black text-zinc-950">
                   Pedido gerado com sucesso
                 </p>
@@ -311,13 +324,14 @@ export default function AppCartDrawer() {
                   ref={pixTextAreaRef}
                   value={manualPix.pix.copyPaste}
                   readOnly
+                  aria-label="Código Pix copia e cola"
                   className="mt-2 h-28 w-full resize-none rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-800 outline-none"
                 />
 
                 <Button
                   type="button"
                   onClick={handleCopyPix}
-                  className="mt-3 h-12 w-full rounded-2xl bg-orange-500 text-base font-black text-black hover:bg-orange-400"
+                  className="mt-3 h-12 w-full rounded-full bg-[#f24423] text-base font-black text-white hover:bg-[#d93617]"
                 >
                   <Copy className="mr-2 size-4" />
                   {copied ? "Pix copiado" : "Copiar código Pix"}
@@ -336,7 +350,7 @@ export default function AppCartDrawer() {
                   type="button"
                   onClick={handlePaymentReported}
                   disabled={reportingPayment}
-                  className="mt-4 h-14 w-full rounded-2xl bg-orange-500 text-base font-black uppercase text-black hover:bg-orange-400 disabled:bg-zinc-200 disabled:text-zinc-500"
+                  className="mt-4 h-14 w-full rounded-full bg-[#f24423] text-base font-black uppercase text-white hover:bg-[#d93617] disabled:bg-zinc-200 disabled:text-zinc-500"
                 >
                   <CheckCircle2 className="mr-2 size-5" />
                   {reportingPayment
@@ -350,7 +364,7 @@ export default function AppCartDrawer() {
               <Button
                 type="button"
                 onClick={() => setManualPix(null)}
-                className="h-14 w-full rounded-2xl border border-zinc-900 bg-white text-base font-black uppercase text-zinc-950 hover:bg-zinc-100"
+                className="h-14 w-full rounded-full border border-[#f24423] bg-white text-base font-black uppercase text-[#f24423] hover:bg-[#fff2ee]"
               >
                 Voltar ao carrinho
               </Button>
@@ -360,9 +374,9 @@ export default function AppCartDrawer() {
           <div className="flex min-h-0 flex-1 flex-col bg-white">
             <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-5">
               {cart.length === 0 && (
-                <div className="rounded-2xl border border-zinc-200 bg-white p-4">
-                  <p className="text-sm font-semibold text-zinc-950">
-                    Seu carrinho está vazio.
+                <div className="rounded-[1.5rem] border border-dashed border-[#cfc7d4] bg-[#f9f7fa] p-6 text-center">
+                  <p className="text-sm font-bold text-[#17111f]">
+                    Sua sacola está vazia.
                   </p>
 
                   <p className="mt-1 text-xs text-zinc-500">
@@ -374,7 +388,7 @@ export default function AppCartDrawer() {
               {cart.map((item) => (
                 <div
                   key={`${item.id}|${item.ticketName}`}
-                  className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm"
+                  className="rounded-[1.5rem] border border-[#e8e3eb] bg-white p-4"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
@@ -398,9 +412,11 @@ export default function AppCartDrawer() {
                     </div>
 
                     <Button
+                      type="button"
                       variant="ghost"
                       size="icon"
                       onClick={() => handleRemove(item)}
+                      aria-label={`Remover ${item.ticketName} da sacola`}
                       className="shrink-0 text-zinc-700 hover:bg-zinc-100 hover:text-red-600"
                     >
                       <Trash2 className="size-4" />
@@ -409,10 +425,12 @@ export default function AppCartDrawer() {
 
                   <div className="mt-4 flex items-center gap-2">
                     <Button
+                      type="button"
                       variant="outline"
                       size="icon"
                       onClick={() => handleDecrease(item)}
-                      className="bg-white text-zinc-950"
+                      aria-label={`Diminuir quantidade de ${item.ticketName}`}
+                      className="rounded-full bg-white text-zinc-950"
                     >
                       <Minus className="size-4" />
                     </Button>
@@ -422,10 +440,12 @@ export default function AppCartDrawer() {
                     </span>
 
                     <Button
+                      type="button"
                       variant="outline"
                       size="icon"
                       onClick={() => handleIncrease(item)}
-                      className="bg-white text-zinc-950"
+                      aria-label={`Aumentar quantidade de ${item.ticketName}`}
+                      className="rounded-full bg-white text-zinc-950"
                     >
                       <Plus className="size-4" />
                     </Button>
@@ -434,14 +454,14 @@ export default function AppCartDrawer() {
               ))}
             </div>
 
-            <div className="shrink-0 border-t border-zinc-200 bg-white px-4 py-4 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] sm:px-5">
+            <div className="shrink-0 border-t border-[#e8e3eb] bg-white px-4 py-4 shadow-[0_-8px_24px_rgba(23,17,31,0.06)] sm:px-5">
               <div className="mb-4 flex items-center justify-between text-base text-zinc-950">
                 <span className="font-semibold">Total</span>
                 <span className="font-black">{formatBRL(total)}</span>
               </div>
 
               <Button
-                className="h-14 w-full rounded-2xl bg-orange-500 text-base font-black uppercase text-black hover:bg-orange-400 disabled:bg-zinc-200 disabled:text-zinc-500"
+                className="h-14 w-full rounded-full bg-[#f24423] text-base font-black uppercase text-white hover:bg-[#d93617] disabled:bg-zinc-200 disabled:text-zinc-500"
                 disabled={!cart.length || checkoutLoading}
                 onClick={handleCheckout}
               >

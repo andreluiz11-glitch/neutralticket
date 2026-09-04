@@ -3,11 +3,13 @@ import "./globals.css";
 
 import AppHeader from "@/components/AppHeader";
 import AppCartDrawer from "@/components/AppCartDrawer";
+import AppFooter from "@/components/AppFooter";
 import MetaPixel from "@/components/MetaPixel";
 
 export const metadata: Metadata = {
-  title: "Clube do Ingresso",
-  description: "Eventos, festas e ingressos online.",
+  title: "INGRESSE",
+  description:
+    "Descubra eventos, escolha seus ingressos e garanta sua próxima experiência com segurança.",
 };
 
 export default function RootLayout({
@@ -17,12 +19,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body>
+      <body className="min-h-dvh">
         <MetaPixel />
 
         <AppHeader />
 
         {children}
+
+        <AppFooter />
 
         <AppCartDrawer />
       </body>

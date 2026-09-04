@@ -328,7 +328,7 @@ export default function AdminPage() {
           <h1 className="text-2xl font-black">Acesso administrativo</h1>
 
           <p className="mt-2 text-sm text-zinc-600">
-            Digite o PIN para acessar o painel do Clube do Ingresso.
+            Digite o PIN para acessar o painel da INGRESSE.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -373,7 +373,7 @@ export default function AdminPage() {
             Painel administrativo
           </p>
 
-          <h1 className="mt-2 text-3xl font-black">Clube do Ingresso</h1>
+          <h1 className="mt-2 text-3xl font-black">INGRESSE</h1>
 
           <p className="mt-2 max-w-2xl text-sm text-zinc-400">
             Aqui você confere os pedidos Pix, confirma pagamentos e copia os

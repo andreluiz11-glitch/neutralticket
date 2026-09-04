@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { hashPassword } from "@/lib/hash";
+import { AuthError, authenticateOrCreateUser } from "@/lib/auth";
 import { signJwt } from "@/lib/jwt";
 
 const COOKIE_NAME = "nt_session";
@@ -15,42 +14,7 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as SignupBody;
 
-    const name = body.name?.trim() || null;
-    const email = body.email?.trim().toLowerCase();
-    const password = body.password?.trim();
-
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email e senha são obrigatórios." },
-        { status: 400 }
-      );
-    }
-
-    const exists = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (exists) {
-      return NextResponse.json(
-        { error: "Email já cadastrado." },
-        { status: 409 }
-      );
-    }
-
-    const passwordHash = await hashPassword(password);
-
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        passwordHash,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-      },
-    });
+    const { user, created } = await authenticateOrCreateUser(body);
 
     const token = await signJwt({
       sub: user.id,
@@ -59,10 +23,17 @@ export async function POST(req: Request) {
 
     const res = NextResponse.json(
       {
-        message: "Usuário criado com sucesso!",
-        user,
+        message: created
+          ? "Conta criada e acesso liberado."
+          : "Login realizado com sucesso.",
+        created,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        },
       },
-      { status: 201 }
+      { status: created ? 201 : 200 }
     );
 
     res.cookies.set({
@@ -77,14 +48,14 @@ export async function POST(req: Request) {
 
     return res;
   } catch (error: unknown) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Erro no cadastro.";
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
 
+    console.error("AUTH_SIGNUP_ERROR", error);
     return NextResponse.json(
-      { error: message },
-      { status: 500 }
+      { error: "Não foi possível criar sua conta agora. Tente novamente." },
+      { status: 503 }
     );
   }
 }

@@ -1,6 +1,12 @@
 import { SignJWT, jwtVerify } from "jose";
 
-const secret = new TextEncoder().encode(process.env.JWT_SECRET || "secret");
+const secretValue = process.env.JWT_SECRET || process.env.ADMIN_SESSION_SECRET;
+
+if (!secretValue) {
+  throw new Error("JWT_SECRET ou ADMIN_SESSION_SECRET deve estar configurado.");
+}
+
+const secret = new TextEncoder().encode(secretValue);
 
 export async function signJwt(payload: any) {
   return new SignJWT(payload)

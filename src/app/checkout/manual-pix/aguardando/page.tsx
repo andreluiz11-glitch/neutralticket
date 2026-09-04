@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight, Clock3, Mail, ReceiptText } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -11,69 +12,71 @@ export default async function ManualPixWaitingPage({
   const orderId = params.orderId || "";
 
   return (
-    <main className="min-h-screen bg-zinc-950 px-4 py-12 text-white">
-      <section className="mx-auto max-w-2xl rounded-3xl border border-zinc-800 bg-white p-6 text-zinc-950 shadow-2xl sm:p-8">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-500 text-3xl font-black text-black">
-          ✓
-        </div>
-
-        <h1 className="mt-6 text-center text-3xl font-black">
-          Pagamento informado
-        </h1>
-
-        <p className="mt-3 text-center text-sm leading-relaxed text-zinc-600">
-          Recebemos sua confirmação. Agora o organizador irá conferir o
-          pagamento manualmente. Após a aprovação, os dados do ingresso e as
-          informações do evento serão enviados para o seu e-mail.
-        </p>
-
-        {orderId && (
-          <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-            <p className="text-xs font-bold uppercase text-zinc-500">
-              Número do pedido
-            </p>
-
-            <p className="mt-1 break-all text-sm font-black text-zinc-950">
-              {orderId}
-            </p>
+    <main className="grid min-h-[calc(100dvh-74px)] place-items-center bg-[#f7f5f8] px-4 py-12 sm:px-6">
+      <section className="w-full max-w-3xl overflow-hidden rounded-[2rem] border border-[#e8e3eb] bg-white shadow-[0_24px_70px_rgba(23,17,31,0.1)]">
+        <div className="p-6 sm:p-10">
+          <div className="grid size-16 place-items-center rounded-2xl bg-[#fff3dd] text-[#b86400]">
+            <Clock3 className="size-8" strokeWidth={2.1} />
           </div>
-        )}
 
-        <div className="mt-6 rounded-2xl border border-orange-200 bg-orange-50 p-4">
-          <p className="text-sm font-black text-zinc-950">Atenção</p>
-
-          <p className="mt-2 text-sm leading-relaxed text-zinc-700">
-            O ingresso ainda não está liberado. Ele só será enviado depois que o
-            pagamento for confirmado manualmente pelo organizador.
+          <p className="mt-8 text-[0.75rem] font-black uppercase tracking-[0.15em] text-[#f24423]">
+            Pix informado
           </p>
+          <h1 className="mt-3 max-w-2xl text-[clamp(2.35rem,6vw,4.5rem)] font-black leading-[0.93] tracking-[-0.06em] text-[#17111f]">
+            Agora é só aguardar a conferência.
+          </h1>
+          <p className="mt-5 max-w-2xl text-[1rem] leading-7 text-[#6f6875]">
+            Recebemos sua confirmação. O organizador verificará o pagamento e,
+            após a aprovação, seu ingresso aparecerá na conta e será enviado ao
+            e-mail cadastrado.
+          </p>
+
+          {orderId && (
+            <div className="mt-8 flex items-start gap-3 rounded-2xl border border-[#e8e3eb] bg-[#f7f5f8] p-4 sm:p-5">
+              <ReceiptText className="mt-0.5 size-5 shrink-0 text-[#f24423]" />
+              <div className="min-w-0">
+                <p className="text-[0.75rem] font-black uppercase tracking-[0.1em] text-[#837b88]">
+                  Número do pedido
+                </p>
+                <p className="mt-1 break-all text-[0.9375rem] font-black text-[#17111f]">
+                  {orderId}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-4 flex items-start gap-3 rounded-2xl border border-[#f3d49d] bg-[#fff9ed] p-4 sm:p-5">
+            <Mail className="mt-0.5 size-5 shrink-0 text-[#b86400]" />
+            <div>
+              <p className="text-[0.9375rem] font-black text-[#302936]">
+                O ingresso ainda não está liberado
+              </p>
+              <p className="mt-1 text-[0.875rem] leading-6 text-[#6f6875]">
+                Não faça um novo pagamento. Acompanhe a atualização em “Minhas
+                compras” e fique atento ao seu e-mail.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/account"
+              className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-[#f24423] px-6 text-[0.9375rem] font-black text-white transition hover:-translate-y-0.5 hover:bg-[#d93617]"
+            >
+              Ver minhas compras
+              <ArrowRight className="size-4" />
+            </Link>
+            <Link
+              href="/"
+              className="inline-flex min-h-[52px] items-center justify-center rounded-full border border-[#d8d1dc] px-6 text-[0.9375rem] font-bold text-[#302936] transition hover:border-[#f24423] hover:text-[#f24423]"
+            >
+              Voltar ao início
+            </Link>
+          </div>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-          <p className="text-sm font-black text-zinc-950">
-            Próximo passo
-          </p>
-
-          <p className="mt-2 text-sm leading-relaxed text-zinc-700">
-            Fique atento ao seu e-mail cadastrado. Assim que o pagamento for
-            conferido, você receberá o ingresso com as informações necessárias
-            para utilizar no evento.
-          </p>
-        </div>
-
-        <div className="mt-8 grid gap-3 sm:grid-cols-2">
-          <Link
-            href="/account"
-            className="flex h-12 items-center justify-center rounded-2xl bg-orange-500 text-sm font-black uppercase text-black hover:bg-orange-400"
-          >
-            Minhas compras
-          </Link>
-
-          <Link
-            href="/"
-            className="flex h-12 items-center justify-center rounded-2xl border border-zinc-900 bg-white text-sm font-black uppercase text-zinc-950 hover:bg-zinc-100"
-          >
-            Voltar ao início
-          </Link>
+        <div className="brand-grid border-t border-[#ffd0c4] bg-[#f24423] px-6 py-5 text-[0.8125rem] font-semibold text-white/80 sm:px-10">
+          Confirmação manual · Você acompanha tudo pela sua conta
         </div>
       </section>
     </main>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { hasValidAdminSession } from "@/lib/adminAuth";
 import { getOrderById, updateOrderStatus } from "@/lib/orders";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +10,10 @@ export async function POST(
     params: Promise<{ orderId: string }>;
   }
 ) {
+  if (!(await hasValidAdminSession())) {
+    return NextResponse.json({ error: "Acesso não autorizado." }, { status: 401 });
+  }
+
   const { orderId } = await context.params;
 
   if (!orderId) {

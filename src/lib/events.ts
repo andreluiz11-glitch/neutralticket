@@ -16,6 +16,7 @@ export type EventItem = {
   id?: string;
   title: string;
   date?: string;
+  dates?: string[];
   location?: string;
   category?: string;
   price?: number;
@@ -115,6 +116,11 @@ function normalize(event: any): EventItem {
     id: event?.id ? String(event.id) : undefined,
     title,
     date: event?.date ? String(event.date) : undefined,
+    dates: Array.isArray(event?.dates)
+      ? event.dates
+          .map((date: unknown) => String(date || "").trim())
+          .filter(Boolean)
+      : [],
     location: event?.location ? String(event.location) : undefined,
     category: event?.category ? String(event.category) : undefined,
     price: parseNumber(event?.price),

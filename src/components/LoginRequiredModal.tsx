@@ -44,7 +44,7 @@ export default function LoginRequiredModal({
           </Link>
 
           <Link
-            href="/signup"
+            href="/login"
             className="inline-flex h-12 items-center justify-center rounded-xl border border-zinc-950 bg-white px-4 text-sm font-semibold text-zinc-950 transition hover:bg-zinc-100"
           >
             Criar conta

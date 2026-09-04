@@ -337,7 +337,7 @@ ${textTickets}
   const result = await resend.emails.send({
     from: emailFrom,
     to: order.customerEmail,
-    subject: "Seu ingresso - Clube do Ingresso",
+    subject: "Seu ingresso - INGRESSE",
     html,
     text,
   });

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { hasValidAdminSession } from "@/lib/adminAuth";
 import { generateTicketsForOrder } from "@/lib/tickets";
 import { sendTicketEmail } from "@/lib/email";
 import {
@@ -15,6 +16,13 @@ export async function POST(
   }
 ) {
   try {
+    if (!(await hasValidAdminSession())) {
+      return NextResponse.json(
+        { error: "Acesso não autorizado." },
+        { status: 401 }
+      );
+    }
+
     const { orderId } = await context.params;
 
     if (!orderId) {

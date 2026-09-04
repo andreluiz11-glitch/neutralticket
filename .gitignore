@@ -8,8 +8,9 @@
 
 .env*.local
 
-node_modules
-
-.nextgit add .
-
+node_modules/
 .next/
+*.tsbuildinfo
+
+# Arquivos usados apenas para revisar referências locais
+public/.review/

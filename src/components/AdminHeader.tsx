@@ -10,13 +10,13 @@ export default function AdminHeader() {
 
   async function handleLogout() {
     try {
-      await fetch("/api/admin/logout", {
+      await fetch("/admin/logout", {
         method: "POST",
         credentials: "include",
       });
     } catch {}
 
-    router.push("/admin/login");
+    router.replace("/admin");
     router.refresh();
   }
 
@@ -34,7 +34,7 @@ export default function AdminHeader() {
             </p>
 
             <p className="text-lg font-black text-zinc-950">
-              Clube do Ingresso
+              INGRESSE
             </p>
           </div>
         </Link>
@@ -48,7 +48,7 @@ export default function AdminHeader() {
           </Link>
 
           <Link
-            href="/admin"
+            href="/admin#pedidos"
             className="rounded-xl px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-950"
           >
             Pedidos Pix
@@ -59,13 +59,6 @@ export default function AdminHeader() {
             className="rounded-xl px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-950"
           >
             Validar ingressos
-          </Link>
-
-          <Link
-            href="/admin/events"
-            className="rounded-xl px-4 py-2 text-sm font-bold text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-950"
-          >
-            Eventos
           </Link>
 
           <Link
@@ -110,13 +103,6 @@ export default function AdminHeader() {
             className="whitespace-nowrap rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-bold text-zinc-700"
           >
             Validar ingressos
-          </Link>
-
-          <Link
-            href="/admin/events"
-            className="whitespace-nowrap rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-bold text-zinc-700"
-          >
-            Eventos
           </Link>
 
           <Link
