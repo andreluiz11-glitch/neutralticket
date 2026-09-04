@@ -11,6 +11,8 @@ export type Ticket = {
   customerEmail: string;
   eventSlug: string;
   eventTitle: string;
+  eventDate?: string | null;
+  eventLocation?: string | null;
   ticketName: string;
   status: TicketStatus;
   createdAt: string;
@@ -36,6 +38,8 @@ function mapTicket(ticket: any): Ticket {
     customerEmail: ticket.customerEmail,
     eventSlug: ticket.eventSlug,
     eventTitle: ticket.eventTitle,
+    eventDate: ticket.eventDate || null,
+    eventLocation: ticket.eventLocation || null,
     ticketName: ticket.ticketName,
     status: statusFromPrisma(ticket.status),
     createdAt: ticket.createdAt.toISOString(),
@@ -92,6 +96,8 @@ export async function generateTicketsForOrder(orderId: string): Promise<Ticket[]
       customerEmail: order.customerEmail,
       eventSlug: item.eventSlug,
       eventTitle: item.eventTitle || item.eventSlug,
+      eventDate: item.eventDate || null,
+      eventLocation: item.eventLocation || null,
       ticketName: item.ticketName,
       status: "valid" as const,
     }));

@@ -35,6 +35,11 @@ type Order = {
   createdAt: string;
   updatedAt: string;
   paidAt?: string;
+  emailMessageId?: string | null;
+  emailDeliveryStatus?: string | null;
+  emailSentAt?: string | null;
+  emailDeliveredAt?: string | null;
+  emailLastError?: string | null;
 };
 
 type Ticket = {
@@ -72,7 +77,7 @@ function getStatusLabel(status: string) {
   if (status === "PENDING_PAYMENT") return "Aguardando pagamento";
   if (status === "PAYMENT_REPORTED") return "Cliente informou pagamento";
   if (status === "PAID") return "Pagamento confirmado";
-  if (status === "TICKET_SENT") return "Ingresso enviado";
+  if (status === "TICKET_SENT") return "Envio solicitado";
   if (status === "CANCELED") return "Cancelado";
   return status;
 }
@@ -98,6 +103,30 @@ function getTicketStatusLabel(status: string) {
   if (status === "USED") return "Utilizado";
   if (status === "CANCELED") return "Cancelado";
   return status;
+}
+
+function getEmailStatus(status?: string | null) {
+  if (status === "delivered" || status === "opened" || status === "clicked") {
+    return { label: "Entregue", className: "text-green-700" };
+  }
+  if (status === "sent") {
+    return { label: "Enviado pelo provedor", className: "text-green-700" };
+  }
+  if (status === "accepted") {
+    return { label: "Aceito pelo provedor", className: "text-orange-700" };
+  }
+  if (
+    status === "failed" ||
+    status === "bounced" ||
+    status === "suppressed" ||
+    status === "complained"
+  ) {
+    return { label: "Falha na entrega", className: "text-red-700" };
+  }
+  if (status === "delayed") {
+    return { label: "Entrega atrasada", className: "text-orange-700" };
+  }
+  return { label: "Ainda não enviado", className: "text-zinc-600" };
 }
 
 function getTicketUrl(code: string) {
@@ -246,35 +275,50 @@ export default function AdminPage() {
     }
   }
 
-  async function confirmOrder(orderId: string) {
+  async function confirmOrder(order: Order) {
+    const isResend =
+      order.status === "PAID" || order.status === "TICKET_SENT";
     const ok = confirm(
-      "Confirma que você recebeu esse pagamento no Pix e quer gerar o ingresso?"
+      isResend
+        ? "Deseja reenviar todos os ingressos deste pedido para o e-mail do cliente?"
+        : "Confirma que você recebeu esse pagamento no Pix e quer gerar e enviar os ingressos?"
     );
 
     if (!ok) return;
 
     try {
-      setActionLoading(orderId);
+      setActionLoading(order.id);
 
-      const res = await fetch(`/api/admin/orders/${orderId}/confirm`, {
+      const res = await fetch(`/api/admin/orders/${order.id}/confirm`, {
         method: "POST",
         credentials: "include",
       });
 
       const data = await res.json();
 
-      if (!res.ok) {
+      if (Array.isArray(data.tickets)) {
+        setTicketsByOrder((current) => ({
+          ...current,
+          [order.id]: data.tickets,
+        }));
+      }
+
+      if (!res.ok || !data.emailSent) {
         throw new Error(data?.error || "Erro ao confirmar pedido.");
       }
 
       setTicketsByOrder((current) => ({
         ...current,
-        [orderId]: Array.isArray(data.tickets) ? data.tickets : [],
+        [order.id]: Array.isArray(data.tickets) ? data.tickets : [],
       }));
 
       await loadOrders();
 
-      alert("Pagamento confirmado e ingresso gerado com sucesso.");
+      alert(
+        isResend
+          ? "Reenvio aceito pelo provedor de e-mail."
+          : "Pagamento confirmado, ingressos gerados e envio aceito pelo provedor."
+      );
     } catch (error: any) {
       alert(error?.message || "Não foi possível confirmar o pedido.");
     } finally {
@@ -458,6 +502,7 @@ export default function AdminPage() {
                 const orderTickets = ticketsByOrder[order.id] || [];
                 const canShowTickets =
                   order.status === "PAID" || order.status === "TICKET_SENT";
+                const emailStatus = getEmailStatus(order.emailDeliveryStatus);
 
                 return (
                   <article
@@ -492,7 +537,7 @@ export default function AdminPage() {
 
                     <div className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[1fr_300px]">
                       <div className="space-y-5">
-                        <div className="grid gap-4 md:grid-cols-2">
+                        <div className="grid gap-4 md:grid-cols-3">
                           <div className="rounded-2xl border border-zinc-200 p-4">
                             <p className="text-xs font-bold uppercase text-zinc-500">
                               Cliente
@@ -519,6 +564,30 @@ export default function AdminPage() {
                             <p className="mt-1 break-all text-sm text-zinc-600">
                               TXID: {order.pixTxid}
                             </p>
+                          </div>
+
+                          <div className="rounded-2xl border border-zinc-200 p-4">
+                            <p className="text-xs font-bold uppercase text-zinc-500">
+                              Entrega por e-mail
+                            </p>
+
+                            <p
+                              className={`mt-2 text-sm font-black ${emailStatus.className}`}
+                            >
+                              {emailStatus.label}
+                            </p>
+
+                            {order.emailDeliveredAt && (
+                              <p className="mt-1 text-xs text-zinc-600">
+                                Entregue em {formatDate(order.emailDeliveredAt)}
+                              </p>
+                            )}
+
+                            {order.emailLastError && (
+                              <p className="mt-2 break-words text-xs leading-5 text-red-700">
+                                {order.emailLastError}
+                              </p>
+                            )}
                           </div>
                         </div>
 
@@ -655,14 +724,15 @@ export default function AdminPage() {
                             type="button"
                             disabled={
                               actionLoading === order.id ||
-                              order.status === "PAID" ||
-                              order.status === "TICKET_SENT" ||
                               order.status === "CANCELED"
                             }
-                            onClick={() => confirmOrder(order.id)}
+                            onClick={() => confirmOrder(order)}
                             className="h-12 w-full rounded-xl bg-orange-500 text-sm font-black uppercase text-black hover:bg-orange-400 disabled:bg-zinc-200 disabled:text-zinc-500"
                           >
-                            Confirmar pagamento
+                            {order.status === "PAID" ||
+                            order.status === "TICKET_SENT"
+                              ? "Reenviar ingressos"
+                              : "Confirmar pagamento"}
                           </Button>
 
                           <Button

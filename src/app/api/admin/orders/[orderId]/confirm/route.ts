@@ -1,19 +1,16 @@
 import { NextResponse } from "next/server";
 import { hasValidAdminSession } from "@/lib/adminAuth";
-import { generateTicketsForOrder } from "@/lib/tickets";
-import { sendTicketEmail } from "@/lib/email";
 import {
-  getOrderById,
-  updateOrderStatus,
-} from "@/lib/orders";
+  fulfillOrderAndSendTickets,
+  TicketEmailDeliveryError,
+} from "@/lib/orderFulfillment";
+import { getOrderById } from "@/lib/orders";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(
   request: Request,
-  context: {
-    params: Promise<{ orderId: string }>;
-  }
+  context: { params: Promise<{ orderId: string }> }
 ) {
   try {
     if (!(await hasValidAdminSession())) {
@@ -27,136 +24,49 @@ export async function POST(
 
     if (!orderId) {
       return NextResponse.json(
-        {
-          error: "Pedido não informado.",
-        },
-        {
-          status: 400,
-        }
+        { error: "Pedido não informado." },
+        { status: 400 }
       );
     }
 
-    const order = await getOrderById(orderId);
+    const currentOrder = await getOrderById(orderId);
 
-    if (!order) {
+    if (!currentOrder) {
       return NextResponse.json(
-        {
-          error: "Pedido não encontrado.",
-        },
-        {
-          status: 404,
-        }
+        { error: "Pedido não encontrado." },
+        { status: 404 }
       );
     }
 
-    const paidOrder = await updateOrderStatus(
+    const result = await fulfillOrderAndSendTickets({
       orderId,
-      "PAID"
-    );
-
-    if (!paidOrder) {
-      return NextResponse.json(
-        {
-          error:
-            "Não foi possível atualizar o pedido.",
-        },
-        {
-          status: 500,
-        }
-      );
-    }
-
-    const tickets =
-      await generateTicketsForOrder(orderId);
-
-    const orderData: any = paidOrder;
-
-    const customerName =
-      orderData.customerName ||
-      orderData.customer?.name ||
-      "Cliente";
-
-    const customerEmail =
-      orderData.customerEmail ||
-      orderData.customer?.email ||
-      "";
-
-    if (!customerEmail) {
-      return NextResponse.json(
-        {
-          error:
-            "E-mail do cliente não encontrado.",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
-
-    const baseUrl = new URL(request.url).origin;
-
-    let emailSent = false;
-    let emailError: string | null = null;
-
-    try {
-      await sendTicketEmail({
-        baseUrl,
-
-        order: {
-          id: orderData.id,
-          customerName,
-          customerEmail,
-          total: orderData.total || 0,
-        },
-
-        tickets: tickets.map(
-          (ticket: any) => ({
-            code: ticket.code,
-            eventTitle: ticket.eventTitle,
-            eventSlug: ticket.eventSlug,
-            ticketName: ticket.ticketName,
-            customerName:
-              ticket.customerName ||
-              customerName,
-            customerEmail:
-              ticket.customerEmail ||
-              customerEmail,
-          })
-        ),
-      });
-
-      emailSent = true;
-    } catch (error: any) {
-      emailSent = false;
-
-      emailError =
-        error?.message ||
-        "Não foi possível enviar o e-mail.";
-    }
-
-    const finalOrder = emailSent
-      ? await updateOrderStatus(
-          orderId,
-          "TICKET_SENT"
-        )
-      : paidOrder;
-
-    return NextResponse.json({
-      order: finalOrder,
-      tickets,
-      emailSent,
-      emailError,
+      baseUrl: new URL(request.url).origin,
+      forceResend:
+        currentOrder.status === "TICKET_SENT" ||
+        Boolean(currentOrder.emailMessageId),
     });
-  } catch (error: any) {
+
+    return NextResponse.json(result);
+  } catch (error: unknown) {
+    if (error instanceof TicketEmailDeliveryError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          tickets: error.tickets,
+          emailSent: false,
+        },
+        { status: 502 }
+      );
+    }
+
     return NextResponse.json(
       {
         error:
-          error?.message ||
-          "Não foi possível confirmar o pagamento.",
+          error instanceof Error
+            ? error.message
+            : "Não foi possível confirmar o pagamento.",
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 }

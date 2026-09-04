@@ -1,21 +1,14 @@
 import { NextResponse } from "next/server";
 import PDFDocument from "pdfkit";
 import QRCode from "qrcode";
+import { getEventBySlug } from "@/lib/events";
 import { getTicketByCode } from "@/lib/tickets";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-function getBaseUrl() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
-  }
-
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-
-  return "http://localhost:3000";
+function getBaseUrl(request: Request) {
+  return new URL(request.url).origin;
 }
 
 function formatStatus(status: string) {
@@ -24,7 +17,24 @@ function formatStatus(status: string) {
   return "Válido";
 }
 
-function createPdfBuffer(ticket: any, qrCodeBuffer: Buffer) {
+function formatEventDate(value?: string | null) {
+  const match = value?.match(
+    /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?/
+  );
+  if (!match) return value || "Data a confirmar";
+
+  const [, year, month, day, hour, minute] = match;
+  return hour && minute
+    ? `${day}/${month}/${year} às ${hour}:${minute}`
+    : `${day}/${month}/${year}`;
+}
+
+function createPdfBuffer(
+  ticket: any,
+  qrCodeBuffer: Buffer,
+  eventDates: string,
+  eventLocation: string
+) {
   return new Promise<Buffer>((resolve, reject) => {
     const doc = new PDFDocument({
       size: "A4",
@@ -99,6 +109,14 @@ function createPdfBuffer(ticket: any, qrCodeBuffer: Buffer) {
 
     doc.moveDown(0.5);
 
+    doc.text(`Data e horário: ${eventDates}`);
+
+    doc.moveDown(0.5);
+
+    doc.text(`Local: ${eventLocation}`);
+
+    doc.moveDown(0.5);
+
     doc.text(`Status: ${formatStatus(ticket.status)}`);
 
     doc.moveDown(1);
@@ -155,7 +173,13 @@ export async function GET(
       );
     }
 
-    const baseUrl = getBaseUrl();
+    const event = await getEventBySlug(ticket.eventSlug);
+    const eventDates = event?.dates?.length
+      ? event.dates.map(formatEventDate).join(" • ")
+      : formatEventDate(ticket.eventDate || event?.date);
+    const eventLocation =
+      ticket.eventLocation || event?.location || "Local a confirmar";
+    const baseUrl = getBaseUrl(request);
     const ticketUrl = `${baseUrl}/tickets/${ticket.code}`;
 
     const qrCodeDataUrl = await QRCode.toDataURL(ticketUrl, {
@@ -169,7 +193,12 @@ export async function GET(
     );
 
     const qrCodeBuffer = Buffer.from(qrCodeBase64, "base64");
-    const pdfBuffer = await createPdfBuffer(ticket, qrCodeBuffer);
+    const pdfBuffer = await createPdfBuffer(
+      ticket,
+      qrCodeBuffer,
+      eventDates,
+      eventLocation
+    );
 
     return new Response(new Uint8Array(pdfBuffer), {
       status: 200,

@@ -16,13 +16,13 @@ model User {
   passwordHash String
   createdAt    DateTime @default(now())
 
-  orders       Order[]
+  orders Order[]
 }
 
 model Order {
-  id            String        @id @default(cuid())
-  userId        String?
-  user          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  id     String  @id @default(cuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   customerName  String?
   customerEmail String
@@ -30,44 +30,56 @@ model Order {
   status        OrderStatus   @default(pending)
   paymentMethod PaymentMethod @default(manual_pix)
 
-  total         Int
-  pixTxid       String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  paidAt        DateTime?
+  total     Int
+  pixTxid   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  paidAt    DateTime?
 
-  items         OrderItem[]
-  tickets       Ticket[]
+  emailMessageId      String?
+  emailDeliveryStatus String?
+  emailSentAt         DateTime?
+  emailDeliveredAt    DateTime?
+  emailLastError      String?
+
+  items   OrderItem[]
+  tickets Ticket[]
+
+  @@index([emailMessageId])
 }
 
 model OrderItem {
-  id         String  @id @default(cuid())
-  orderId    String
-  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-  eventSlug  String
-  eventTitle String?
-  ticketName String
-  unitPrice  Int
-  qty        Int
+  eventSlug     String
+  eventTitle    String?
+  eventDate     String?
+  eventLocation String?
+  ticketName    String
+  unitPrice     Int
+  qty           Int
 }
 
 model Ticket {
-  id            String       @id @default(cuid())
-  code          String       @unique
-  orderId       String
-  order         Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id      String @id @default(cuid())
+  code    String @unique
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   customerName  String?
   customerEmail String
 
   eventSlug     String
   eventTitle    String
+  eventDate     String?
+  eventLocation String?
   ticketName    String
 
-  status        TicketStatus @default(valid)
-  createdAt     DateTime     @default(now())
-  usedAt        DateTime?
+  status    TicketStatus @default(valid)
+  createdAt DateTime     @default(now())
+  usedAt    DateTime?
 }
 
 enum OrderStatus {

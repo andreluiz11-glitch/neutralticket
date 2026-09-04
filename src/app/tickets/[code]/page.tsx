@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Download, ShieldCheck, TicketCheck } from "lucide-react";
 import QRCode from "qrcode";
+import { getEventBySlug } from "@/lib/events";
 import { getTicketByCode } from "@/lib/tickets";
 
 export const dynamic = "force-dynamic";
@@ -37,23 +38,35 @@ function maskEmail(email: string) {
   return `${visible}${"•".repeat(Math.max(3, localPart.length - visible.length))}@${domain}`;
 }
 
+function formatEventDate(value?: string | null) {
+  const match = value?.match(
+    /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?/
+  );
+  if (!match) return value || "Data a confirmar";
+
+  const [, year, month, day, hour, minute] = match;
+  return hour && minute
+    ? `${day}/${month}/${year} às ${hour}:${minute}`
+    : `${day}/${month}/${year}`;
+}
+
 async function getCurrentOrigin() {
-  const configuredOrigin =
-    process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL;
-
-  if (configuredOrigin) {
-    try {
-      return new URL(configuredOrigin).origin;
-    } catch {
-      // Continua com a origem da requisição em ambiente local.
-    }
-  }
-
   const headerList = await headers();
   const rawHost = headerList.get("x-forwarded-host") || headerList.get("host");
   const host = rawHost?.split(",")[0]?.trim();
 
   if (!host || !/^[a-z0-9.-]+(?::\d+)?$/i.test(host)) {
+    const configuredOrigin =
+      process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL;
+
+    if (configuredOrigin) {
+      try {
+        return new URL(configuredOrigin).origin;
+      } catch {
+        // Usa localhost quando a configuração não contém uma URL válida.
+      }
+    }
+
     return "http://localhost:3000";
   }
 
@@ -79,6 +92,13 @@ export default async function TicketPage({
 
   const ticket = await getTicketByCode(code);
   if (!ticket) return notFound();
+
+  const event = await getEventBySlug(ticket.eventSlug);
+  const eventDates = event?.dates?.length
+    ? event.dates.map(formatEventDate).join(" • ")
+    : formatEventDate(ticket.eventDate || event?.date);
+  const eventLocation =
+    ticket.eventLocation || event?.location || "Local a confirmar";
 
   const origin = await getCurrentOrigin();
   const ticketUrl = `${origin}/tickets/${encodeURIComponent(ticket.code)}`;
@@ -175,6 +195,22 @@ export default async function TicketPage({
                 </dt>
                 <dd className="mt-2 break-all font-mono text-[0.8125rem] font-bold text-[#302936]">
                   {ticket.code}
+                </dd>
+              </div>
+              <div className="bg-white p-4 sm:p-5">
+                <dt className="text-[0.75rem] font-black uppercase tracking-[0.08em] text-[#837b88]">
+                  Data e horário
+                </dt>
+                <dd className="mt-2 break-words text-[0.9375rem] font-black leading-6 text-[#302936]">
+                  {eventDates}
+                </dd>
+              </div>
+              <div className="bg-white p-4 sm:p-5">
+                <dt className="text-[0.75rem] font-black uppercase tracking-[0.08em] text-[#837b88]">
+                  Local
+                </dt>
+                <dd className="mt-2 break-words text-[0.9375rem] font-black leading-6 text-[#302936]">
+                  {eventLocation}
                 </dd>
               </div>
             </dl>
