@@ -20,8 +20,14 @@ import {
   updateCartQty,
 } from "@/lib/cart";
 
-type TicketTier = { name: string; price: number };
 type PassportDetail = { title: string; date: string };
+type TicketTier = {
+  name: string;
+  price: number;
+  batch?: string;
+  dateLabels?: string[];
+  details?: PassportDetail[];
+};
 type TicketOption = {
   name: string;
   price: number;
@@ -136,8 +142,7 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
   const options = useMemo<TicketOption[]>(() => {
     const baseOptions = event.tickets?.length
       ? event.tickets.map((ticket) => ({
-          name: ticket.name,
-          price: ticket.price,
+          ...ticket,
         }))
       : typeof event.price === "number"
         ? [{ name: "Ingresso único", price: event.price }]
@@ -146,14 +151,20 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
     const isRiviera = normalizeText(event.title).includes("riviera");
     return baseOptions.map((ticket) => ({
       ...ticket,
-      batch: "1º lote",
+      batch: ticket.batch || "1º lote",
       date: formatDate(event.date),
-      dateLabels: event.dates?.length
+      dateLabels: ticket.dateLabels?.length
+        ? ticket.dateLabels
+        : event.dates?.length
         ? event.dates.map(formatCompactDate)
         : event.date
           ? [formatCompactDate(event.date)]
           : [],
-      details: isRiviera ? getRivieraDetails(ticket.name) : undefined,
+      details: ticket.details?.length
+        ? ticket.details
+        : isRiviera
+          ? getRivieraDetails(ticket.name)
+          : undefined,
     }));
   }, [event]);
 

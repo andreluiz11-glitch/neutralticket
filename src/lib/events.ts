@@ -9,6 +9,9 @@ export type ExtraField = {
 export type TicketTier = {
   name: string;
   price: number;
+  batch?: string;
+  dateLabels?: string[];
+  details?: Array<{ title: string; date: string }>;
 };
 
 export type EventItem = {
@@ -98,6 +101,18 @@ function normalize(event: any): EventItem {
         .map((ticket: any) => ({
           name: String(ticket.name).trim(),
           price: parseNumber(ticket.price) ?? 0,
+          batch: ticket.batch ? String(ticket.batch).trim() : undefined,
+          dateLabels: Array.isArray(ticket.dateLabels)
+            ? ticket.dateLabels.map((label: unknown) => String(label).trim()).filter(Boolean)
+            : undefined,
+          details: Array.isArray(ticket.details)
+            ? ticket.details
+                .filter((detail: any) => detail && detail.title)
+                .map((detail: any) => ({
+                  title: String(detail.title).trim(),
+                  date: detail.date ? String(detail.date).trim() : "",
+                }))
+            : undefined,
         }))
         .filter((ticket: TicketTier) => ticket.name.length > 0)
     : [];

@@ -40,5 +40,121 @@
       }
     ],
     "extras": []
+  },
+  {
+    "slug": "reveillon-araxas-2027",
+    "title": "RÉVEILLON ARAXÁS 2027",
+    "date": "2026-12-27T22:00",
+    "dates": [
+      "2026-12-27T22:00",
+      "2026-12-28T22:00",
+      "2026-12-29T22:00",
+      "2026-12-30T22:00",
+      "2026-12-31T22:00",
+      "2027-01-02T22:00"
+    ],
+    "location": "Arena Araxás - Alameda do Cacau, 300, Juquehy, São Sebastião - SP",
+    "category": "Réveillon",
+    "price": 1098,
+    "imageUrl": "/uploads/reveillon-araxas-2027.jpg",
+    "description": "De 27 de dezembro de 2026 a 2 de janeiro de 2027, o Réveillon Araxás retorna a Juquehy para seis noites inesquecíveis no litoral norte de São Paulo.\n\nTodos os dias contam com Full Open Bar Premium, grandes atrações e uma experiência que une praia, esportes na areia e a energia da Arena Araxás.\n\nClassificação etária: 18 anos. É obrigatória a apresentação de documento oficial com foto. Os ingressos são pessoais e o QR Code deve ser apresentado diretamente pelo titular.\n\nA programação, os horários e as atrações poderão ser alterados pela organização por motivos operacionais, de segurança ou força maior.",
+    "attractions": [
+      "Matheus & Kauan",
+      "Dennis",
+      "Filipe Ret",
+      "Matuê",
+      "Turma do Pagode",
+      "MC Cabelinho",
+      "MC Hariel",
+      "Joãozinho VT",
+      "DJ GBR",
+      "DJ Topo"
+    ],
+    "tickets": [
+      {
+        "name": "PACOTE COMPLETO - FEMININO",
+        "price": 2090,
+        "batch": "Pacote 6 festas",
+        "details": [
+          { "title": "27/12 - Festa Full Open Bar Premium", "date": "dom, 27/12/26 • 22h00" },
+          { "title": "28/12 - Festa Full Open Bar Premium", "date": "seg, 28/12/26 • 22h00" },
+          { "title": "29/12 - Festa Full Open Bar Premium", "date": "ter, 29/12/26 • 22h00" },
+          { "title": "30/12 - Festa Full Open Bar Premium", "date": "qua, 30/12/26 • 22h00" },
+          { "title": "31/12 - Festa Full Open Bar Premium", "date": "qui, 31/12/26 • 22h00" },
+          { "title": "02/01 - Festa Full Open Bar Premium", "date": "sáb, 02/01/27 • 22h00" }
+        ]
+      },
+      {
+        "name": "PACOTE COMPLETO - MASCULINO",
+        "price": 2450,
+        "batch": "Pacote 6 festas",
+        "details": [
+          { "title": "27/12 - Festa Full Open Bar Premium", "date": "dom, 27/12/26 • 22h00" },
+          { "title": "28/12 - Festa Full Open Bar Premium", "date": "seg, 28/12/26 • 22h00" },
+          { "title": "29/12 - Festa Full Open Bar Premium", "date": "ter, 29/12/26 • 22h00" },
+          { "title": "30/12 - Festa Full Open Bar Premium", "date": "qua, 30/12/26 • 22h00" },
+          { "title": "31/12 - Festa Full Open Bar Premium", "date": "qui, 31/12/26 • 22h00" },
+          { "title": "02/01 - Festa Full Open Bar Premium", "date": "sáb, 02/01/27 • 22h00" }
+        ]
+      },
+      {
+        "name": "MINICOMBO 3 FESTAS - 28, 29 E 31/12 - FEMININO",
+        "price": 1233,
+        "batch": "Minicombo 3 festas",
+        "dateLabels": ["28/12 • 29/12 • 31/12"]
+      },
+      {
+        "name": "MINICOMBO 3 FESTAS - 28, 29 E 31/12 - MASCULINO",
+        "price": 1440,
+        "batch": "Minicombo 3 festas",
+        "dateLabels": ["28/12 • 29/12 • 31/12"]
+      },
+      {
+        "name": "MINICOMBO 3 FESTAS - 29, 31/12 E 02/01 - FEMININO",
+        "price": 1098,
+        "batch": "Minicombo 3 festas",
+        "dateLabels": ["29/12 • 31/12 • 02/01"]
+      },
+      {
+        "name": "MINICOMBO 3 FESTAS - 29, 31/12 E 02/01 - MASCULINO",
+        "price": 1287,
+        "batch": "Minicombo 3 festas",
+        "dateLabels": ["29/12 • 31/12 • 02/01"]
+      },
+      {
+        "name": "MINICOMBO 4 FESTAS - 27, 29, 31/12 E 02/01 - FEMININO",
+        "price": 1620,
+        "batch": "Minicombo 4 festas",
+        "dateLabels": ["27/12 • 29/12 • 31/12 • 02/01"]
+      },
+      {
+        "name": "MINICOMBO 4 FESTAS - 27, 29, 31/12 E 02/01 - MASCULINO",
+        "price": 1845,
+        "batch": "Minicombo 4 festas",
+        "dateLabels": ["27/12 • 29/12 • 31/12 • 02/01"]
+      },
+      {
+        "name": "MINICOMBO 4 FESTAS - 28, 30, 31/12 E 02/01 - FEMININO",
+        "price": 1620,
+        "batch": "Minicombo 4 festas",
+        "dateLabels": ["28/12 • 30/12 • 31/12 • 02/01"]
+      },
+      {
+        "name": "MINICOMBO 4 FESTAS - 28, 30, 31/12 E 02/01 - MASCULINO",
+        "price": 1845,
+        "batch": "Minicombo 4 festas",
+        "dateLabels": ["28/12 • 30/12 • 31/12 • 02/01"]
+      }
+    ],
+    "extras": [
+      {
+        "title": "Full Open Bar Premium",
+        "content": "Todos os pacotes incluem acesso às festas selecionadas com serviço Full Open Bar Premium."
+      },
+      {
+        "title": "Informações importantes",
+        "content": "Evento exclusivo para maiores de 18 anos. Leve documento oficial com foto e apresente o ingresso digital diretamente no celular."
+      }
+    ]
   }
 ]
