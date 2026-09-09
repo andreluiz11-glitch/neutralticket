@@ -24,6 +24,7 @@ type PassportDetail = { title: string; date: string };
 type TicketTier = {
   name: string;
   price: number;
+  originalPrice?: number;
   batch?: string;
   dateLabels?: string[];
   details?: PassportDetail[];
@@ -31,6 +32,7 @@ type TicketTier = {
 type TicketOption = {
   name: string;
   price: number;
+  originalPrice?: number;
   batch: string;
   date?: string;
   dateLabels?: string[];
@@ -249,6 +251,16 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
         <h2 className="sr-only">Escolha seus ingressos</h2>
 
         <div className="space-y-3">
+          {normalizeText(event.title).includes("riviera") && (
+            <div className="rounded-[1.25rem] border border-[#ffb6a5] bg-[#fff4f0] px-5 py-4 text-[#7d200d] shadow-[0_8px_24px_rgba(242,68,35,0.08)]">
+              <p className="text-sm font-black uppercase tracking-[0.04em]">
+                50% de desconto via PIX
+              </p>
+              <p className="mt-1 text-xs font-bold">
+                Somente no 1º lote, por tempo limitado e exclusivo através deste link.
+              </p>
+            </div>
+          )}
           {options.length === 0 ? (
             <div className="rounded-[1.5rem] border border-[#e8e3eb] bg-white p-6 text-center">
               <p className="font-bold text-[#302936]">Ingressos em breve</p>
@@ -284,9 +296,16 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
                     </p>
 
                     <div className="mt-3 flex items-center justify-between gap-4">
-                      <p className="text-[1.15rem] font-black tracking-[-0.025em] text-[#17111f]">
-                        {formatBRL(option.price)}
-                      </p>
+                      <div>
+                        {option.originalPrice && option.originalPrice > option.price && (
+                          <p className="text-[0.8rem] font-bold text-[#8d858f] line-through decoration-2">
+                            {formatBRL(option.originalPrice)}
+                          </p>
+                        )}
+                        <p className="text-[1.15rem] font-black tracking-[-0.025em] text-[#17111f]">
+                          {formatBRL(option.price)}
+                        </p>
+                      </div>
                       <div className="flex shrink-0 items-center gap-2">
                         <button
                           type="button"
