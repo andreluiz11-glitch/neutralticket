@@ -7,9 +7,28 @@ import AppFooter from "@/components/AppFooter";
 import MetaPixel from "@/components/MetaPixel";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.ingresseclub.com"),
   title: "INGRESSE",
   description:
     "Descubra eventos, escolha seus ingressos e garanta sua próxima experiência com segurança.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "INGRESSE",
+    description:
+      "Descubra eventos, escolha seus ingressos e garanta sua próxima experiência com segurança.",
+    url: "/",
+    siteName: "INGRESSE",
+    locale: "pt_BR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "INGRESSE",
+    description:
+      "Descubra eventos, escolha seus ingressos e garanta sua próxima experiência com segurança.",
+  },
 };
 
 export default function RootLayout({
