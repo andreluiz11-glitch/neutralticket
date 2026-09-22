@@ -1,4 +1,4 @@
-const API_BASE = "https://ecommerce-api.svcp.picpay.com";
+const API_BASE = "https://ecommerce-api.svc.picpay.com";
 
 export function isPicPayConfigured() {
   return Boolean(
@@ -39,7 +39,10 @@ export async function createPicPayCheckout(input: {
     throw new Error("Falha na autenticação com o PicPay.");
   }
 
-  const response = await fetch(`${API_BASE}/checkout`, {
+  const expiresAt = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+  const response = await fetch(`${API_BASE}/v1/paymentlink/create`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -47,30 +50,34 @@ export async function createPicPayCheckout(input: {
       Authorization: `Bearer ${auth.access_token}`,
     },
     body: JSON.stringify({
-      billingUrlAddress: "https://www.ingresseclub.com",
-      amount: input.amountCents,
-      description: `Ingressos Ingresse - pedido ${input.orderId}`,
-      customer: {
-        name: input.name,
-        email: input.email,
-        documentType: "CPF",
-        document: input.cpf,
-        phone: {
-          countryCode: "55",
-          areaCode: input.phone.slice(0, 2),
-          number: input.phone.slice(2),
-          type: "MOBILE",
+      charge: {
+        name: `Pedido INGRESSE ${input.orderId.slice(-8).toUpperCase()}`,
+        description: "Ingressos de evento vendidos pela INGRESSE",
+        order_number: input.orderId,
+        redirect_url: `https://www.ingresseclub.com/account?order=${encodeURIComponent(input.orderId)}`,
+        payment: {
+          methods: ["BRCODE", "CREDIT_CARD"],
+          brcode_arrangements: ["PICPAY", "PIX"],
         },
+        amounts: {
+          product: input.amountCents,
+          delivery: 0,
+        },
+      },
+      options: {
+        allow_create_pix_key: true,
+        card_max_installment_number: 6,
+        expired_at: expiresAt,
       },
     }),
     cache: "no-store",
   });
   const data = await response.json().catch(() => null);
-  if (!response.ok || typeof data?.id !== "string" || typeof data?.checkoutUrl !== "string") {
+  if (!response.ok || typeof data?.link !== "string") {
     throw new Error("Não foi possível abrir o checkout do PicPay. Tente novamente.");
   }
 
-  const url = new URL(data.checkoutUrl);
+  const url = new URL(data.link);
   if (
     url.protocol !== "https:" ||
     !(
@@ -82,5 +89,15 @@ export async function createPicPayCheckout(input: {
     throw new Error("O PicPay retornou uma URL de pagamento inválida.");
   }
 
-  return { id: data.id as string, checkoutUrl: url.toString() };
+  const pathParts = url.pathname.split("/").filter(Boolean);
+  const idFromLink = pathParts[pathParts.length - 1] || "";
+  const checkoutId =
+    (typeof data?.paymentLinkId === "string" && data.paymentLinkId) ||
+    (typeof data?.details?.paymentLinkId === "string" && data.details.paymentLinkId) ||
+    idFromLink;
+  if (!checkoutId) {
+    throw new Error("O PicPay não retornou o identificador da cobrança.");
+  }
+
+  return { id: checkoutId, checkoutUrl: url.toString() };
 }
