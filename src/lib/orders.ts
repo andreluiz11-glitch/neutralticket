@@ -29,7 +29,7 @@ export type Order = {
   customer: OrderCustomer;
   items: OrderItem[];
   amount: number;
-  paymentMethod: "MANUAL_PIX";
+  paymentMethod: "MANUAL_PIX" | "PICPAY";
   pixTxid: string;
   createdAt: string;
   updatedAt: string;
@@ -168,7 +168,7 @@ function mapOrder(order: any): Order {
       email: order.customerEmail,
     },
     amount: fromCents(order.total),
-    paymentMethod: "MANUAL_PIX",
+    paymentMethod: order.paymentMethod === "picpay" ? "PICPAY" : "MANUAL_PIX",
     pixTxid: order.pixTxid || "",
     createdAt: order.createdAt.toISOString(),
     updatedAt: order.updatedAt.toISOString(),
@@ -237,9 +237,11 @@ export async function getOrderByIdForUser(
   return order ? mapOrder(order) : null;
 }
 
-export async function createManualPixOrder(input: {
+async function createCheckoutOrder(input: {
   userId: string;
   items: unknown;
+  paymentMethod: "manual_pix" | "picpay";
+  customerName?: string;
 }): Promise<Order> {
   const user = await prisma.user.findUnique({
     where: {
@@ -269,10 +271,10 @@ export async function createManualPixOrder(input: {
   const created = await prisma.order.create({
     data: {
       userId: user.id,
-      customerName: user.name || null,
+      customerName: input.customerName || user.name || null,
       customerEmail: user.email,
       status: "pending",
-      paymentMethod: "manual_pix",
+      paymentMethod: input.paymentMethod,
       total: toCents(amount),
       pixTxid: "",
       items: {
@@ -292,6 +294,8 @@ export async function createManualPixOrder(input: {
     },
   });
 
+  if (input.paymentMethod === "picpay") return mapOrder(created);
+
   const pixTxid = createPixTxid(created.id);
 
   const updated = await prisma.order.update({
@@ -307,6 +311,18 @@ export async function createManualPixOrder(input: {
   });
 
   return mapOrder(updated);
+}
+
+export function createManualPixOrder(input: { userId: string; items: unknown }) {
+  return createCheckoutOrder({ ...input, paymentMethod: "manual_pix" });
+}
+
+export function createPicPayOrder(input: {
+  userId: string;
+  items: unknown;
+  customerName: string;
+}) {
+  return createCheckoutOrder({ ...input, paymentMethod: "picpay" });
 }
 
 export async function updateOrderStatus(

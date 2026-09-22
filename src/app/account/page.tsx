@@ -36,6 +36,7 @@ type Order = {
   createdAt: string;
   items: OrderItem[];
   tickets: OrderTicket[];
+  cancellationRequestedAt?: string | null;
 };
 
 function formatBRL(cents: number) {
@@ -270,6 +271,12 @@ export default function AccountPage() {
                         <CalendarDays className="size-4 text-[#f24423]" />
                         {formatDate(order.createdAt)}
                       </p>
+                      <Link
+                        href={`/cancelamento?orderId=${encodeURIComponent(order.id)}`}
+                        className="mt-4 inline-flex text-xs font-black text-[#f24423] underline underline-offset-2"
+                      >
+                        {order.cancellationRequestedAt ? "Acompanhar cancelamento" : "Solicitar cancelamento"}
+                      </Link>
                     </aside>
                   </div>
                 </article>

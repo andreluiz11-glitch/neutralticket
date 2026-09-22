@@ -32,9 +32,12 @@ model Order {
 
   total     Int
   pixTxid   String?
+  providerCheckoutId String? @unique
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   paidAt    DateTime?
+  cancellationRequestedAt DateTime?
+  cancellationReason      String?
 
   emailMessageId      String?
   emailDeliveryStatus String?

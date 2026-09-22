@@ -19,8 +19,15 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     const pixKey = process.env.PIX_KEY;
-    const receiverName = process.env.PIX_RECEIVER_NAME || "KAYO BRANDAO";
-    const receiverCity = process.env.PIX_RECEIVER_CITY || "SAO PAULO";
+    const receiverName = String(process.env.PIX_RECEIVER_NAME || "").trim();
+    const receiverCity = String(process.env.PIX_RECEIVER_CITY || "").trim();
+
+    if (!receiverName || !receiverCity) {
+      return NextResponse.json(
+        { error: "Dados do recebedor Pix não configurados." },
+        { status: 503 }
+      );
+    }
 
     if (!pixKey) {
       return NextResponse.json(

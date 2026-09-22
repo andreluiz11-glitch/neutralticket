@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, CircleHelp, ShieldCheck, TicketCheck } from "lucide-react";
 import EventBuyBox from "@/components/EventBuyBox";
 import EventShareButton from "@/components/EventShareButton";
+import ResaleDisclosure from "@/components/ResaleDisclosure";
 import { getEventBySlug } from "@/lib/events";
 
 export const dynamic = "force-dynamic";
@@ -65,6 +66,9 @@ export default async function EventTicketsPage({ params }: EventTicketsPageProps
       <section className="mx-auto w-full max-w-[1280px] px-4 py-7 sm:px-6 sm:py-10 lg:px-8">
         <div className="grid min-w-0 gap-7 lg:grid-cols-[minmax(0,1fr)_330px] lg:items-start xl:gap-10">
           <div className="min-w-0">
+            <div className="mb-5">
+              <ResaleDisclosure compact />
+            </div>
             <div className="mb-5 inline-flex min-h-[76px] items-center rounded-2xl border-2 border-[#f24423] bg-[#fff5f1] px-5 text-[0.8125rem] font-black uppercase tracking-[0.06em] text-[#d93617] sm:min-h-[86px] sm:px-6">
               Passaportes e ingressos
             </div>

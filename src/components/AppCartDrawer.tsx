@@ -76,6 +76,10 @@ export default function AppCartDrawer() {
   const [manualPix, setManualPix] = useState<ManualPixResponse | null>(null);
   const [copied, setCopied] = useState(false);
   const [reportingPayment, setReportingPayment] = useState(false);
+  const [picpayEnabled, setPicpayEnabled] = useState(false);
+  const [buyerName, setBuyerName] = useState("");
+  const [buyerCpf, setBuyerCpf] = useState("");
+  const [buyerPhone, setBuyerPhone] = useState("");
 
   const total = useMemo(() => getCartTotal(cart), [cart]);
 
@@ -90,6 +94,7 @@ export default function AppCartDrawer() {
       const currentUser = data.user || null;
 
       setMe(currentUser);
+      if (currentUser?.name) setBuyerName(currentUser.name);
 
       return currentUser;
     } catch {
@@ -101,6 +106,10 @@ export default function AppCartDrawer() {
   useEffect(() => {
     setCart(getCart());
     refreshUser();
+    fetch("/api/checkout/picpay", { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => setPicpayEnabled(data.enabled === true))
+      .catch(() => setPicpayEnabled(false));
 
     async function openCart() {
       setCart(getCart());
@@ -202,7 +211,7 @@ export default function AppCartDrawer() {
         return;
       }
 
-      const res = await fetch("/api/checkout/manual-pix", {
+      const res = await fetch(picpayEnabled ? "/api/checkout/picpay" : "/api/checkout/manual-pix", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -210,18 +219,24 @@ export default function AppCartDrawer() {
         credentials: "include",
         body: JSON.stringify({
           items: cart,
+          ...(picpayEnabled ? { name: buyerName, cpf: buyerCpf, phone: buyerPhone } : {}),
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.error || "Falha ao gerar Pix.");
+        throw new Error(data?.error || "Falha ao iniciar o pagamento.");
       }
 
-      setManualPix(data);
-    } catch (error: any) {
-      alert(error?.message || "Não foi possível gerar o Pix.");
+      if (picpayEnabled) {
+        if (!data?.checkoutUrl) throw new Error("O PicPay não retornou o checkout.");
+        window.location.assign(data.checkoutUrl);
+      } else {
+        setManualPix(data);
+      }
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : "Não foi possível iniciar o pagamento.");
     } finally {
       setCheckoutLoading(false);
     }
@@ -252,9 +267,9 @@ export default function AppCartDrawer() {
       window.location.href = `/checkout/manual-pix/aguardando?orderId=${encodeURIComponent(
         manualPix.orderId
       )}`;
-    } catch (error: any) {
+    } catch (error: unknown) {
       alert(
-        error?.message || "Não foi possível informar o pagamento. Tente novamente."
+        error instanceof Error ? error.message : "Não foi possível informar o pagamento. Tente novamente."
       );
       setReportingPayment(false);
     }
@@ -401,7 +416,7 @@ export default function AppCartDrawer() {
                       </p>
 
                       <p className="mt-1 text-xs text-zinc-500">
-                        {formatDate(item.date)}
+                        {item.dateLabel || formatDate(item.date)}
                         {item.location ? ` — ${item.location}` : ""}
                       </p>
 
@@ -455,9 +470,26 @@ export default function AppCartDrawer() {
             </div>
 
             <div className="shrink-0 border-t border-[#e8e3eb] bg-white px-4 py-4 shadow-[0_-8px_24px_rgba(23,17,31,0.06)] sm:px-5">
+              {picpayEnabled && (
+                <div className="mb-4 space-y-2">
+                  <p className="text-sm font-bold text-zinc-950">Dados para pagamento seguro no PicPay</p>
+                  <input aria-label="Nome completo" autoComplete="name" placeholder="Nome completo" value={buyerName} onChange={(event) => setBuyerName(event.target.value)} className="h-11 w-full rounded-xl border border-zinc-300 px-3 text-sm" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input aria-label="CPF" inputMode="numeric" autoComplete="off" placeholder="CPF" value={buyerCpf} onChange={(event) => setBuyerCpf(event.target.value)} className="h-11 min-w-0 rounded-xl border border-zinc-300 px-3 text-sm" />
+                    <input aria-label="Celular com DDD" inputMode="tel" autoComplete="tel" placeholder="Celular com DDD" value={buyerPhone} onChange={(event) => setBuyerPhone(event.target.value)} className="h-11 min-w-0 rounded-xl border border-zinc-300 px-3 text-sm" />
+                  </div>
+                  <p className="text-xs text-zinc-600">Cartão ou Pix são escolhidos na página segura do PicPay. O ingresso só é liberado após a confirmação do pagamento.</p>
+                </div>
+              )}
               <div className="mb-4 flex items-center justify-between text-base text-zinc-950">
                 <span className="font-semibold">Total</span>
                 <span className="font-black">{formatBRL(total)}</span>
+              </div>
+
+              <div className="mb-4 rounded-2xl border border-[#ffd0c4] bg-[#fff5f2] p-3 text-xs leading-relaxed text-[#702310]">
+                <strong className="block text-sm text-[#f24423]">Compra em plataforma independente de revenda</strong>
+                A INGRESSE não é o canal oficial do evento. Os preços podem ser superiores aos praticados pelo canal oficial. Ao continuar, você confirma que entendeu essa condição. Consulte também a nossa{" "}
+                <a href="/cancelamento" className="font-black underline underline-offset-2">política de cancelamento</a>.
               </div>
 
               <Button
@@ -466,7 +498,7 @@ export default function AppCartDrawer() {
                 onClick={handleCheckout}
               >
                 <Ticket className="mr-2 size-5" />
-                {checkoutLoading ? "Gerando Pix..." : "Finalizar compra"}
+                {checkoutLoading ? "Abrindo pagamento..." : picpayEnabled ? "Pagar com cartão ou Pix" : "Finalizar compra"}
               </Button>
             </div>
           </div>

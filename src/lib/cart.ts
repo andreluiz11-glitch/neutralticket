@@ -2,6 +2,7 @@ export type CartItem = {
   id: string;
   title: string;
   date?: string;
+  dateLabel?: string;
   location?: string;
   ticketName: string;
   unitPrice: number;

@@ -579,6 +579,16 @@ export default function SiteHeader() {
                       <ChevronRight className="ml-auto size-4 text-[#a49ca8]" />
                     </Link>
 
+                    <Link
+                      href="/cancelamento"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-3 rounded-2xl px-3 py-3 text-[0.9375rem] font-semibold text-[#302936] transition hover:bg-[#f7f5f8]"
+                    >
+                      <Ticket className="size-[18px] text-[#f24423]" />
+                      Cancelamento e reembolso
+                      <ChevronRight className="ml-auto size-4 text-[#a49ca8]" />
+                    </Link>
+
                     {me ? (
                       <>
                         <Link

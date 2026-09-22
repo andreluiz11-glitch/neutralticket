@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, CalendarDays, MapPin, Sparkles } from "lucide-react";
 import EventShareButton from "@/components/EventShareButton";
 import MetaViewContent from "@/components/MetaViewContent";
+import ResaleDisclosure from "@/components/ResaleDisclosure";
 import { getEventBySlug } from "@/lib/events";
 
 export const dynamic = "force-dynamic";
@@ -144,8 +145,9 @@ export default async function EventPage({ params }: EventPageProps) {
       </section>
 
       <section className="mx-auto w-full max-w-[1040px] px-4 py-14 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+        <ResaleDisclosure />
         {!!eventDates.length && (
-          <div>
+          <div className="mt-14">
             <p className="text-[0.75rem] font-black uppercase tracking-[0.18em] text-[#f24423]">Programação</p>
             <h2 className="mt-2 text-[clamp(1.9rem,4vw,3rem)] font-black uppercase tracking-[-0.045em]">Datas disponíveis</h2>
             <div className="-mx-4 mt-7 flex snap-x gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:px-0">

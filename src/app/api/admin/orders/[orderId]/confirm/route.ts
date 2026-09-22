@@ -38,6 +38,13 @@ export async function POST(
       );
     }
 
+    if (currentOrder.paymentMethod === "PICPAY") {
+      return NextResponse.json(
+        { error: "Pedidos PicPay são confirmados exclusivamente pelo webhook autenticado." },
+        { status: 409 }
+      );
+    }
+
     const result = await fulfillOrderAndSendTickets({
       orderId,
       baseUrl: new URL(request.url).origin,

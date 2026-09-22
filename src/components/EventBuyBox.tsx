@@ -228,6 +228,7 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
         id: event.id,
         title: event.title,
         date: event.date,
+        dateLabel: option.dateLabels?.join(" • "),
         location: event.location,
         ticketName: option.name,
         unitPrice: option.price,
@@ -254,7 +255,7 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
           {normalizeText(event.title).includes("riviera") && (
             <div className="rounded-[1.25rem] border border-[#ffb6a5] bg-[#fff4f0] px-5 py-4 text-[#7d200d] shadow-[0_8px_24px_rgba(242,68,35,0.08)]">
               <p className="text-sm font-black uppercase tracking-[0.04em]">
-                50% de desconto via PIX
+                50% de desconto nos passaportes
               </p>
               <p className="mt-1 text-xs font-bold">
                 Somente no 1º lote, por tempo limitado e exclusivo através deste link.
