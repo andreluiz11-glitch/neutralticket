@@ -39,6 +39,8 @@ export type Order = {
   emailSentAt?: string | null;
   emailDeliveredAt?: string | null;
   emailLastError?: string | null;
+  cancellationRequestedAt?: string | null;
+  cancellationReason?: string | null;
 };
 
 function createPixTxid(orderId: string) {
@@ -180,6 +182,8 @@ function mapOrder(order: any): Order {
       ? order.emailDeliveredAt.toISOString()
       : null,
     emailLastError: order.emailLastError || null,
+    cancellationRequestedAt: order.cancellationRequestedAt?.toISOString?.() || null,
+    cancellationReason: order.cancellationReason || null,
     items: order.items.map((item: any) => ({
       id: item.eventSlug,
       title: item.eventTitle || item.eventSlug,

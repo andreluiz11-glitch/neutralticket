@@ -42,6 +42,12 @@ export default function AppFooter() {
               Minha conta <ArrowUpRight className="size-4" />
             </Link>
             <Link
+              href="/cancelamento"
+              className="flex items-center justify-between border-b border-white/15 py-4 text-[0.9375rem] font-semibold text-white/85 transition hover:text-white"
+            >
+              Cancelamento e reembolso <ArrowUpRight className="size-4" />
+            </Link>
+            <Link
               href="/login"
               className="flex items-center justify-between border-b border-white/15 py-4 text-[0.9375rem] font-semibold text-white/85 transition hover:text-white"
             >

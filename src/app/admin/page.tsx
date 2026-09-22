@@ -30,7 +30,7 @@ type Order = {
   };
   items: OrderItem[];
   amount: number;
-  paymentMethod: "MANUAL_PIX";
+  paymentMethod: "MANUAL_PIX" | "PICPAY";
   pixTxid: string;
   createdAt: string;
   updatedAt: string;
@@ -40,6 +40,8 @@ type Order = {
   emailSentAt?: string | null;
   emailDeliveredAt?: string | null;
   emailLastError?: string | null;
+  cancellationRequestedAt?: string | null;
+  cancellationReason?: string | null;
 };
 
 type Ticket = {
@@ -537,6 +539,13 @@ export default function AdminPage() {
 
                     <div className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[1fr_300px]">
                       <div className="space-y-5">
+                        {order.cancellationRequestedAt && (
+                          <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-950">
+                            <p className="text-xs font-black uppercase tracking-[0.08em]">Cancelamento solicitado</p>
+                            <p className="mt-2 text-sm font-bold">Registrado em {formatDate(order.cancellationRequestedAt)}</p>
+                            {order.cancellationReason && <p className="mt-2 text-sm leading-relaxed">Motivo: {order.cancellationReason}</p>}
+                          </div>
+                        )}
                         <div className="grid gap-4 md:grid-cols-3">
                           <div className="rounded-2xl border border-zinc-200 p-4">
                             <p className="text-xs font-bold uppercase text-zinc-500">
@@ -558,11 +567,11 @@ export default function AdminPage() {
                             </p>
 
                             <p className="mt-2 text-sm font-black text-zinc-950">
-                              Pix manual
+                              {order.paymentMethod === "PICPAY" ? "PicPay (cartão ou Pix)" : "Pix manual"}
                             </p>
 
                             <p className="mt-1 break-all text-sm text-zinc-600">
-                              TXID: {order.pixTxid}
+                              {order.paymentMethod === "PICPAY" ? "Confirmação automática pelo PicPay" : `TXID: ${order.pixTxid}`}
                             </p>
                           </div>
 
