@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight, CalendarDays, MapPin, Sparkles } from "lucide-re
 import EventShareButton from "@/components/EventShareButton";
 import MetaViewContent from "@/components/MetaViewContent";
 import ResaleDisclosure from "@/components/ResaleDisclosure";
-import { getEventBySlug } from "@/lib/events";
+import { getEventBySlug, isPublicEventHidden } from "@/lib/events";
 
 export const dynamic = "force-dynamic";
 
@@ -83,6 +83,12 @@ function getStartingPrice(tickets?: Array<{ name: string; price: number }>, fall
 
 export async function generateMetadata({ params }: EventPageProps): Promise<Metadata> {
   const { slug } = await params;
+  if (isPublicEventHidden(slug)) {
+    return {
+      title: "Evento temporariamente indisponível | INGRESSE",
+      robots: { index: false, follow: false },
+    };
+  }
   const event = await getEventBySlug(slug);
   if (!event) return { title: "Evento não encontrado | INGRESSE" };
   return {
@@ -93,7 +99,7 @@ export async function generateMetadata({ params }: EventPageProps): Promise<Meta
 
 export default async function EventPage({ params }: EventPageProps) {
   const { slug } = await params;
-  if (!slug) return notFound();
+  if (!slug || isPublicEventHidden(slug)) return notFound();
   const event = await getEventBySlug(slug);
   if (!event) return notFound();
 

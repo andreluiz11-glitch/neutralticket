@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { hasValidAdminSession } from "@/lib/adminAuth";
-import { getEvents, upsertEventBySlug } from "@/lib/events";
+import { getEvents, getPublicEvents, upsertEventBySlug } from "@/lib/events";
 
 // GET /api/events → retorna todos os eventos
 export async function GET() {
   try {
-    const list = await getEvents();
+    const list = (await hasValidAdminSession())
+      ? await getEvents()
+      : await getPublicEvents();
     return NextResponse.json(list);
   } catch (e: any) {
     return NextResponse.json(

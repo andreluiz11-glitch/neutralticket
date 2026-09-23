@@ -5,7 +5,7 @@ import { ArrowLeft, CircleHelp, ShieldCheck, TicketCheck } from "lucide-react";
 import EventBuyBox from "@/components/EventBuyBox";
 import EventShareButton from "@/components/EventShareButton";
 import ResaleDisclosure from "@/components/ResaleDisclosure";
-import { getEventBySlug } from "@/lib/events";
+import { getEventBySlug, isPublicEventHidden } from "@/lib/events";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +13,12 @@ type EventTicketsPageProps = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: EventTicketsPageProps): Promise<Metadata> {
   const { slug } = await params;
+  if (isPublicEventHidden(slug)) {
+    return {
+      title: "Evento temporariamente indisponível | INGRESSE",
+      robots: { index: false, follow: false },
+    };
+  }
   const event = await getEventBySlug(slug);
   if (!event) return { title: "Evento não encontrado | INGRESSE" };
   return {
@@ -23,7 +29,7 @@ export async function generateMetadata({ params }: EventTicketsPageProps): Promi
 
 export default async function EventTicketsPage({ params }: EventTicketsPageProps) {
   const { slug } = await params;
-  if (!slug) return notFound();
+  if (!slug || isPublicEventHidden(slug)) return notFound();
   const event = await getEventBySlug(slug);
   if (!event) return notFound();
 

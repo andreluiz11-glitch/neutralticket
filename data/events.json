@@ -59,9 +59,9 @@
     ],
     "location": "Arena Araxás - Alameda do Cacau, 300, Juquehy, São Sebastião - SP",
     "category": "Réveillon",
-    "price": 1098,
+    "price": 1233,
     "imageUrl": "/uploads/reveillon-araxas-2027.jpg",
-    "description": "De 27 de dezembro de 2026 a 2 de janeiro de 2027, o Réveillon Araxás retorna a Juquehy para seis noites inesquecíveis no litoral norte de São Paulo.\n\nTodos os dias contam com Full Open Bar Premium, grandes atrações e uma experiência que une praia, esportes na areia e a energia da Arena Araxás.\n\nClassificação etária: 18 anos. É obrigatória a apresentação de documento oficial com foto. Os ingressos são pessoais e o QR Code deve ser apresentado diretamente pelo titular.\n\nA programação, os horários e as atrações poderão ser alterados pela organização por motivos operacionais, de segurança ou força maior.",
+    "description": "O Réveillon Araxás 2027 acontece na Arena Araxás, em Juquehy, com seis festas nos dias 27, 28, 29, 30 e 31 de dezembro de 2026 e 2 de janeiro de 2027.\n\nTodos os pacotes incluem as festas selecionadas com Full Open Bar Premium. A experiência reúne música, praia e a programação de fim de ano do litoral norte de São Paulo.\n\nEscolha entre o pacote completo de seis festas ou os minicombos de três e quatro festas. Confira com atenção as datas incluídas em cada opção antes de concluir a compra.",
     "attractions": [
       "Matheus & Kauan",
       "Dennis",
@@ -77,7 +77,7 @@
     "tickets": [
       {
         "name": "PACOTE COMPLETO - FEMININO",
-        "price": 2090,
+        "price": 2240,
         "batch": "Pacote 6 festas",
         "details": [
           { "title": "27/12 - Festa Full Open Bar Premium", "date": "dom, 27/12/26 • 22h00" },
@@ -90,7 +90,7 @@
       },
       {
         "name": "PACOTE COMPLETO - MASCULINO",
-        "price": 2450,
+        "price": 2600,
         "batch": "Pacote 6 festas",
         "details": [
           { "title": "27/12 - Festa Full Open Bar Premium", "date": "dom, 27/12/26 • 22h00" },
@@ -103,49 +103,49 @@
       },
       {
         "name": "MINICOMBO 3 FESTAS - 28, 29 E 31/12 - FEMININO",
-        "price": 1233,
+        "price": 1368,
         "batch": "Minicombo 3 festas",
         "dateLabels": ["28/12 • 29/12 • 31/12"]
       },
       {
         "name": "MINICOMBO 3 FESTAS - 28, 29 E 31/12 - MASCULINO",
-        "price": 1440,
+        "price": 1584,
         "batch": "Minicombo 3 festas",
         "dateLabels": ["28/12 • 29/12 • 31/12"]
       },
       {
         "name": "MINICOMBO 3 FESTAS - 29, 31/12 E 02/01 - FEMININO",
-        "price": 1098,
+        "price": 1233,
         "batch": "Minicombo 3 festas",
         "dateLabels": ["29/12 • 31/12 • 02/01"]
       },
       {
         "name": "MINICOMBO 3 FESTAS - 29, 31/12 E 02/01 - MASCULINO",
-        "price": 1287,
+        "price": 1440,
         "batch": "Minicombo 3 festas",
         "dateLabels": ["29/12 • 31/12 • 02/01"]
       },
       {
         "name": "MINICOMBO 4 FESTAS - 27, 29, 31/12 E 02/01 - FEMININO",
-        "price": 1620,
+        "price": 1755,
         "batch": "Minicombo 4 festas",
         "dateLabels": ["27/12 • 29/12 • 31/12 • 02/01"]
       },
       {
         "name": "MINICOMBO 4 FESTAS - 27, 29, 31/12 E 02/01 - MASCULINO",
-        "price": 1845,
+        "price": 1980,
         "batch": "Minicombo 4 festas",
         "dateLabels": ["27/12 • 29/12 • 31/12 • 02/01"]
       },
       {
         "name": "MINICOMBO 4 FESTAS - 28, 30, 31/12 E 02/01 - FEMININO",
-        "price": 1620,
+        "price": 1755,
         "batch": "Minicombo 4 festas",
         "dateLabels": ["28/12 • 30/12 • 31/12 • 02/01"]
       },
       {
         "name": "MINICOMBO 4 FESTAS - 28, 30, 31/12 E 02/01 - MASCULINO",
-        "price": 1845,
+        "price": 1980,
         "batch": "Minicombo 4 festas",
         "dateLabels": ["28/12 • 30/12 • 31/12 • 02/01"]
       }
@@ -157,7 +157,19 @@
       },
       {
         "title": "Informações importantes",
-        "content": "Evento exclusivo para maiores de 18 anos. Leve documento oficial com foto e apresente o ingresso digital diretamente no celular."
+        "content": "Evento exclusivo para maiores de 18 anos. Menores de idade não entram, mesmo acompanhados. Apresente documento oficial original com foto e o ingresso digital no celular."
+      },
+      {
+        "title": "Acesso e titularidade",
+        "content": "O ingresso é individual e o QR Code será validado uma única vez. Não compartilhe imagens ou capturas de tela do código. O participante deve conferir os dados do ingresso antes do evento."
+      },
+      {
+        "title": "Escolha do pacote",
+        "content": "Cada pacote dá acesso somente às datas indicadas na opção escolhida. Verifique os dias, a categoria e o público do ingresso antes de finalizar o pedido."
+      },
+      {
+        "title": "Alterações e cancelamento",
+        "content": "Horários e atrações podem mudar por decisão da organização. Para cancelamentos, prazos e condições aplicáveis à revenda, consulte a Política de Cancelamento da INGRESSE antes da compra."
       }
     ]
   }

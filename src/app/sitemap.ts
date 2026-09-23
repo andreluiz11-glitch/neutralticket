@@ -13,16 +13,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
-      url: `${siteUrl}/events/reveillon-riviera`,
+      url: `${siteUrl}/events/reveillon-araxas-2027`,
       lastModified,
       changeFrequency: "daily",
       priority: 0.9,
-    },
-    {
-      url: `${siteUrl}/events/reveillon-araxas-2027`,
-      lastModified,
-      changeFrequency: "weekly",
-      priority: 0.8,
     },
     {
       url: `${siteUrl}/cancelamento`,

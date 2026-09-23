@@ -33,6 +33,14 @@ export type EventItem = {
 
 const DATA_PATH = path.join(process.cwd(), "data", "events.json");
 
+// Mantém eventos temporariamente indisponíveis fora do catálogo público sem
+// apagar os dados necessários para pedidos, ingressos emitidos e administração.
+const HIDDEN_PUBLIC_EVENT_SLUGS = new Set(["reveillon-riviera"]);
+
+export function isPublicEventHidden(slug?: string | null) {
+  return Boolean(slug && HIDDEN_PUBLIC_EVENT_SLUGS.has(slug.toLowerCase()));
+}
+
 export function slugify(value?: string | null) {
   return String(value || "")
     .toLowerCase()
@@ -262,4 +270,9 @@ export async function deleteEventBySlug(
   }
 
   return changed;
+}
+
+export async function getPublicEvents(): Promise<EventItem[]> {
+  const events = await getEvents();
+  return events.filter((event) => !isPublicEventHidden(event.slug));
 }
