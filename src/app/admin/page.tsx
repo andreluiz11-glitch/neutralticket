@@ -30,7 +30,7 @@ type Order = {
   };
   items: OrderItem[];
   amount: number;
-  paymentMethod: "MANUAL_PIX" | "PICPAY";
+  paymentMethod: "MANUAL_PIX" | "PICPAY" | "MERCADO_PAGO";
   pixTxid: string;
   createdAt: string;
   updatedAt: string;
@@ -567,11 +567,17 @@ export default function AdminPage() {
                             </p>
 
                             <p className="mt-2 text-sm font-black text-zinc-950">
-                              {order.paymentMethod === "PICPAY" ? "PicPay (cartão ou Pix)" : "Pix manual"}
+                              {order.paymentMethod === "PICPAY"
+                                ? "PicPay (cartão ou Pix)"
+                                : order.paymentMethod === "MERCADO_PAGO"
+                                  ? "Mercado Pago (cartão ou Pix)"
+                                  : "Pix manual"}
                             </p>
 
                             <p className="mt-1 break-all text-sm text-zinc-600">
-                              {order.paymentMethod === "PICPAY" ? "Confirmação automática pelo PicPay" : `TXID: ${order.pixTxid}`}
+                              {order.paymentMethod === "MANUAL_PIX"
+                                ? `TXID: ${order.pixTxid}`
+                                : `Confirmação automática pelo ${order.paymentMethod === "PICPAY" ? "PicPay" : "Mercado Pago"}`}
                             </p>
                           </div>
 

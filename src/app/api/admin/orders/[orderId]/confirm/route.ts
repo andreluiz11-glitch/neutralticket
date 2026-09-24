@@ -38,9 +38,12 @@ export async function POST(
       );
     }
 
-    if (currentOrder.paymentMethod === "PICPAY") {
+    if (
+      currentOrder.paymentMethod === "PICPAY" ||
+      currentOrder.paymentMethod === "MERCADO_PAGO"
+    ) {
       return NextResponse.json(
-        { error: "Pedidos PicPay são confirmados exclusivamente pelo webhook autenticado." },
+        { error: "Pedidos de gateway são confirmados exclusivamente pelo webhook autenticado." },
         { status: 409 }
       );
     }

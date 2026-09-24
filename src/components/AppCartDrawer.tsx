@@ -84,10 +84,7 @@ export default function AppCartDrawer() {
   const [manualPix, setManualPix] = useState<ManualPixResponse | null>(null);
   const [copied, setCopied] = useState(false);
   const [reportingPayment, setReportingPayment] = useState(false);
-  const [picpayEnabled, setPicpayEnabled] = useState(false);
-  const [buyerName, setBuyerName] = useState("");
-  const [buyerCpf, setBuyerCpf] = useState("");
-  const [buyerPhone, setBuyerPhone] = useState("");
+  const [mercadoPagoEnabled, setMercadoPagoEnabled] = useState(false);
 
   const total = useMemo(() => getCartTotal(cart), [cart]);
 
@@ -102,8 +99,6 @@ export default function AppCartDrawer() {
       const currentUser = data.user || null;
 
       setMe(currentUser);
-      if (currentUser?.name) setBuyerName(currentUser.name);
-
       return currentUser;
     } catch {
       setMe(null);
@@ -114,10 +109,10 @@ export default function AppCartDrawer() {
   useEffect(() => {
     setCart(getCart());
     refreshUser();
-    fetch("/api/checkout/picpay", { cache: "no-store" })
+    fetch("/api/checkout/mercado-pago", { cache: "no-store" })
       .then((res) => res.json())
-      .then((data) => setPicpayEnabled(data.enabled === true))
-      .catch(() => setPicpayEnabled(false));
+      .then((data) => setMercadoPagoEnabled(data.enabled === true))
+      .catch(() => setMercadoPagoEnabled(false));
 
     async function openCart() {
       setCart(getCart());
@@ -219,7 +214,7 @@ export default function AppCartDrawer() {
         return;
       }
 
-      const res = await fetch(picpayEnabled ? "/api/checkout/picpay" : "/api/checkout/manual-pix", {
+      const res = await fetch(mercadoPagoEnabled ? "/api/checkout/mercado-pago" : "/api/checkout/manual-pix", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -227,7 +222,6 @@ export default function AppCartDrawer() {
         credentials: "include",
         body: JSON.stringify({
           items: cart,
-          ...(picpayEnabled ? { name: buyerName, cpf: buyerCpf, phone: buyerPhone } : {}),
         }),
       });
 
@@ -237,8 +231,8 @@ export default function AppCartDrawer() {
         throw new Error(data?.error || "Falha ao iniciar o pagamento.");
       }
 
-      if (picpayEnabled) {
-        if (!data?.checkoutUrl) throw new Error("O PicPay não retornou o checkout.");
+      if (mercadoPagoEnabled) {
+        if (!data?.checkoutUrl) throw new Error("O Mercado Pago não retornou o checkout.");
         window.location.assign(data.checkoutUrl);
       } else {
         setManualPix(data);
@@ -490,15 +484,10 @@ export default function AppCartDrawer() {
             </div>
 
             <div className="shrink-0 border-t border-[#e8e3eb] bg-white px-4 py-4 shadow-[0_-8px_24px_rgba(23,17,31,0.06)] sm:px-5">
-              {picpayEnabled && (
-                <div className="mb-4 space-y-2">
-                  <p className="text-sm font-bold text-zinc-950">Dados para pagamento seguro no PicPay</p>
-                  <input aria-label="Nome completo" autoComplete="name" placeholder="Nome completo" value={buyerName} onChange={(event) => setBuyerName(event.target.value)} className="h-11 w-full rounded-xl border border-zinc-300 px-3 text-sm" />
-                  <div className="grid grid-cols-2 gap-2">
-                    <input aria-label="CPF" inputMode="numeric" autoComplete="off" placeholder="CPF" value={buyerCpf} onChange={(event) => setBuyerCpf(event.target.value)} className="h-11 min-w-0 rounded-xl border border-zinc-300 px-3 text-sm" />
-                    <input aria-label="Celular com DDD" inputMode="tel" autoComplete="tel" placeholder="Celular com DDD" value={buyerPhone} onChange={(event) => setBuyerPhone(event.target.value)} className="h-11 min-w-0 rounded-xl border border-zinc-300 px-3 text-sm" />
-                  </div>
-                  <p className="text-xs text-zinc-600">Cartão ou Pix são escolhidos na página segura do PicPay. O ingresso só é liberado após a confirmação do pagamento.</p>
+              {mercadoPagoEnabled && (
+                <div className="mb-4 rounded-2xl border border-[#d8edff] bg-[#f2f9ff] p-3">
+                  <p className="text-sm font-black text-zinc-950">Pagamento seguro pelo Mercado Pago</p>
+                  <p className="mt-1 text-xs leading-relaxed text-zinc-600">Escolha Pix, cartão de crédito ou débito no checkout. O ingresso é liberado automaticamente somente após a confirmação do pagamento.</p>
                 </div>
               )}
               <div className="mb-4 flex items-center justify-between text-base text-zinc-950">
@@ -518,7 +507,7 @@ export default function AppCartDrawer() {
                 onClick={handleCheckout}
               >
                 <Ticket className="mr-2 size-5" />
-                {checkoutLoading ? "Abrindo pagamento..." : picpayEnabled ? "Pagar com cartão ou Pix" : "Finalizar compra"}
+                {checkoutLoading ? "Abrindo pagamento..." : mercadoPagoEnabled ? "Pagar com cartão ou Pix" : "Finalizar compra"}
               </Button>
             </div>
           </div>

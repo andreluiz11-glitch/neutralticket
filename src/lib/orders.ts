@@ -29,7 +29,7 @@ export type Order = {
   customer: OrderCustomer;
   items: OrderItem[];
   amount: number;
-  paymentMethod: "MANUAL_PIX" | "PICPAY";
+  paymentMethod: "MANUAL_PIX" | "PICPAY" | "MERCADO_PAGO";
   pixTxid: string;
   createdAt: string;
   updatedAt: string;
@@ -170,7 +170,12 @@ function mapOrder(order: any): Order {
       email: order.customerEmail,
     },
     amount: fromCents(order.total),
-    paymentMethod: order.paymentMethod === "picpay" ? "PICPAY" : "MANUAL_PIX",
+    paymentMethod:
+      order.paymentMethod === "picpay"
+        ? "PICPAY"
+        : order.paymentMethod === "mercado_pago"
+          ? "MERCADO_PAGO"
+          : "MANUAL_PIX",
     pixTxid: order.pixTxid || "",
     createdAt: order.createdAt.toISOString(),
     updatedAt: order.updatedAt.toISOString(),
@@ -244,7 +249,7 @@ export async function getOrderByIdForUser(
 async function createCheckoutOrder(input: {
   userId: string;
   items: unknown;
-  paymentMethod: "manual_pix" | "picpay";
+  paymentMethod: "manual_pix" | "picpay" | "mercado_pago";
   customerName?: string;
 }): Promise<Order> {
   const user = await prisma.user.findUnique({
@@ -298,7 +303,7 @@ async function createCheckoutOrder(input: {
     },
   });
 
-  if (input.paymentMethod === "picpay") return mapOrder(created);
+  if (input.paymentMethod !== "manual_pix") return mapOrder(created);
 
   const pixTxid = createPixTxid(created.id);
 
@@ -327,6 +332,13 @@ export function createPicPayOrder(input: {
   customerName: string;
 }) {
   return createCheckoutOrder({ ...input, paymentMethod: "picpay" });
+}
+
+export function createMercadoPagoOrder(input: {
+  userId: string;
+  items: unknown;
+}) {
+  return createCheckoutOrder({ ...input, paymentMethod: "mercado_pago" });
 }
 
 export async function updateOrderStatus(
