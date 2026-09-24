@@ -5,6 +5,24 @@ import { buildPixPayload, generatePixQrCodeDataUrl } from "@/lib/pix";
 
 export const dynamic = "force-dynamic";
 
+function isValidCnpj(value: string) {
+  const cnpj = value.replace(/\D/g, "");
+  if (!/^\d{14}$/.test(cnpj) || /^(\d)\1+$/.test(cnpj)) return false;
+
+  const calculateDigit = (base: string, weights: number[]) => {
+    const total = base
+      .split("")
+      .reduce((sum, digit, index) => sum + Number(digit) * weights[index], 0);
+    const remainder = total % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
+  };
+
+  const firstDigit = calculateDigit(cnpj.slice(0, 12), [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+  const secondDigit = calculateDigit(cnpj.slice(0, 13), [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
+
+  return firstDigit === Number(cnpj[12]) && secondDigit === Number(cnpj[13]);
+}
+
 export async function POST(request: Request) {
   try {
     const userId = await getAuthenticatedUserId();
@@ -18,7 +36,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    const pixKey = process.env.PIX_KEY;
+    const pixKey = String(process.env.PIX_KEY || "").replace(/\D/g, "");
     const receiverName = String(process.env.PIX_RECEIVER_NAME || "").trim();
     const receiverCity = String(process.env.PIX_RECEIVER_CITY || "").trim();
 
@@ -29,12 +47,12 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!pixKey) {
+    if (!isValidCnpj(pixKey)) {
       return NextResponse.json(
         {
-          error: "Chave Pix não configurada no .env.local.",
+          error: "A chave Pix CNPJ da empresa não está configurada corretamente.",
         },
-        { status: 500 }
+        { status: 503 }
       );
     }
 
@@ -60,15 +78,20 @@ export async function POST(request: Request) {
       amount: order.amount,
       pix: {
         key: pixKey,
+        keyType: "CNPJ",
+        receiverName,
         txid: order.pixTxid,
         copyPaste: pixCopyPaste,
         qrCodeDataUrl,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
       {
-        error: error?.message || "Não foi possível gerar o Pix.",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Não foi possível gerar o Pix.",
       },
       { status: 400 }
     );

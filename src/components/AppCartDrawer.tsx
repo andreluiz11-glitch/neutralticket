@@ -42,6 +42,8 @@ type ManualPixResponse = {
   amount: number;
   pix: {
     key: string;
+    keyType: "CNPJ";
+    receiverName: string;
     txid: string;
     copyPaste: string;
     qrCodeDataUrl: string;
@@ -65,13 +67,19 @@ const formatDate = (iso?: string) =>
       })
     : "Data não informada";
 
+const formatCnpj = (value: string) => {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length !== 14) return value;
+  return digits.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+};
+
 export default function AppCartDrawer() {
   const pathname = usePathname();
   const pixTextAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const [open, setOpen] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [me, setMe] = useState<MeResponse["user"]>(null);
+  const [, setMe] = useState<MeResponse["user"]>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [manualPix, setManualPix] = useState<ManualPixResponse | null>(null);
   const [copied, setCopied] = useState(false);
@@ -328,6 +336,18 @@ export default function AppCartDrawer() {
                   pagar, clique no botão informando que o pagamento foi
                   efetuado.
                 </p>
+
+                <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-3 text-left">
+                  <p className="text-[0.68rem] font-bold uppercase tracking-[0.08em] text-zinc-500">
+                    Chave Pix CNPJ
+                  </p>
+                  <p className="mt-1 text-sm font-black text-zinc-950">
+                    {formatCnpj(manualPix.pix.key)}
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-zinc-600">
+                    Recebedor: {manualPix.pix.receiverName}
+                  </p>
+                </div>
               </div>
 
               <div className="rounded-2xl border border-zinc-200 bg-white p-4">
