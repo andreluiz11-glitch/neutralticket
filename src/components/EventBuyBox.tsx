@@ -262,6 +262,16 @@ export default function EventBuyBox({ event }: EventBuyBoxProps) {
               </p>
             </div>
           )}
+          {normalizeText(event.title).includes("araxas") && (
+            <div className="rounded-[1.25rem] border border-[#ffb6a5] bg-[#fff4f0] px-5 py-4 text-[#7d200d] shadow-[0_8px_24px_rgba(242,68,35,0.08)]">
+              <p className="text-sm font-black uppercase tracking-[0.04em]">
+                20% de desconto via Pix
+              </p>
+              <p className="mt-1 text-xs font-bold">
+                Por tempo limitado e exclusivo através deste link. O valor anterior aparece riscado em cada opção.
+              </p>
+            </div>
+          )}
           {options.length === 0 ? (
             <div className="rounded-[1.5rem] border border-[#e8e3eb] bg-white p-6 text-center">
               <p className="font-bold text-[#302936]">Ingressos em breve</p>
